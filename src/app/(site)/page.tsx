@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AdCarousel, type CarouselItem } from "@/components/AdCarousel";
 import { BusinessCard } from "@/components/BusinessCard";
 import { listLiveBusinesses } from "@/lib/data";
-import { mediaUrl } from "@/lib/media";
+import { effectiveBannerUrl, mediaUrl } from "@/lib/media";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,7 @@ export default async function HomePage() {
     category: business.category,
     tagline: business.tagline,
     logoUrl: mediaUrl(business.logoPath),
-    bannerUrl: mediaUrl(business.bannerPath),
+    bannerUrl: effectiveBannerUrl(business),
   }));
 
   return (

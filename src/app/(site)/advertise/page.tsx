@@ -79,6 +79,15 @@ export default function AdvertisePage() {
                   </ul>
                 </div>
               )}
+
+              <div className="mt-auto pt-6">
+                <Link
+                  href={`/advertise/checkout?package=${tier.id}`}
+                  className="inline-flex rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-ink"
+                >
+                  Buy this package
+                </Link>
+              </div>
             </article>
           ))}
         </div>
@@ -107,6 +116,12 @@ export default function AdvertisePage() {
             <p className="font-display text-2xl text-brand">
               + {packages.currency} {packages.addOn.priceKes?.toLocaleString()}
             </p>
+            <Link
+              href={`/advertise/checkout?package=${packages.addOn.id}`}
+              className="inline-flex rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-ink"
+            >
+              Buy this add-on
+            </Link>
           </div>
         </div>
       </section>

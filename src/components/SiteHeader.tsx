@@ -13,11 +13,12 @@ export function SiteHeader() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-5">
         <Link href="/" className="flex shrink-0 items-center gap-3">
           <Image
-            src="/brand/rotary-d9215-trf.png"
-            alt="Rotary District 9215 and The Rotary Foundation"
-            width={1281}
-            height={353}
+            src="/brand/rotary-d9215-mark.png"
+            alt="Rotary District 9215"
+            width={567}
+            height={225}
             priority
+            quality={100}
             className="h-10 w-auto sm:h-12"
           />
           <span className="hidden text-[10px] font-medium uppercase tracking-[0.2em] text-muted xl:inline">

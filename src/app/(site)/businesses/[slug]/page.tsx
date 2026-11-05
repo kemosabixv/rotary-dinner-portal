@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { SocialLinks } from "@/components/SocialLinks";
 import { TrackEvent, TrackedLink } from "@/components/Tracking";
 import { getBusinessBySlug } from "@/lib/data";
-import { mediaUrl } from "@/lib/media";
+import { effectiveBannerUrl, mediaUrl } from "@/lib/media";
 import { listLivePollsForBusiness } from "@/lib/polls";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +23,7 @@ export default async function BusinessPage({
   const livePoll = polls[0];
 
   const logo = mediaUrl(business.logoPath);
-  const bannerUrl = mediaUrl(business.bannerPath);
+  const bannerUrl = effectiveBannerUrl(business);
   const videoUrl = mediaUrl(business.videoPath);
   const posterUrl = mediaUrl(business.videoPosterPath);
   const photos = business.photoPaths

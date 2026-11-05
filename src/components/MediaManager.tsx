@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { updateMediaAction } from "@/lib/actions/businesses";
-import { MEDIA_BUCKET, mediaUrl } from "@/lib/media";
+import { MEDIA_BUCKET, bannerSource, mediaUrl } from "@/lib/media";
 import { createClient } from "@/lib/supabase/client";
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -189,6 +189,8 @@ export function MediaManager(props: {
 
   const videoUrl = mediaUrl(media.videoPath);
   const posterUrl = mediaUrl(media.videoPosterPath);
+  const effectiveBanner = mediaUrl(media.bannerPath) ?? mediaUrl(media.photoPaths[0]);
+  const bannerKind = bannerSource(media);
 
   return (
     <section className="space-y-8 rounded-2xl border border-line bg-surface p-6">
@@ -243,6 +245,11 @@ export function MediaManager(props: {
               <div key={path} className="group relative overflow-hidden rounded-lg border border-line bg-paper">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={mediaUrl(path) ?? ""} alt="Business photo" className="h-20 w-full object-cover" />
+                {media.bannerPath === path && (
+                  <span className="absolute left-1 top-1 rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-white">
+                    Banner
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => removeMedia(path, "photo")}
@@ -250,6 +257,15 @@ export function MediaManager(props: {
                 >
                   ×
                 </button>
+                {media.bannerPath !== path && (
+                  <button
+                    type="button"
+                    onClick={() => persist({ ...media, bannerPath: path })}
+                    className="absolute inset-x-0 bottom-0 bg-white/90 px-1 py-0.5 text-[9px] font-medium text-brand opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    Use as banner
+                  </button>
+                )}
               </div>
             ))}
             {media.photoPaths.length === 0 && (
@@ -274,14 +290,20 @@ export function MediaManager(props: {
           JPG/PNG/WebP, max 5MB. Without one, the carousel falls back to a compact logo + text card.
         </p>
 
-        {media.bannerPath ? (
+        {effectiveBanner ? (
           <div className="mt-3 space-y-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={mediaUrl(media.bannerPath) ?? ""}
+              src={effectiveBanner}
               alt="Banner creative"
               className="w-full max-w-xl rounded-xl border border-line object-cover"
             />
+            <p className="text-xs text-muted">
+              In use:{" "}
+              {bannerKind === "banner"
+                ? "uploaded banner creative"
+                : "a gallery photo (fallback) — upload a dedicated banner or mark a different photo as banner below."}
+            </p>
             <div className="flex flex-wrap items-center gap-4">
               <input
                 ref={bannerInput}
@@ -290,23 +312,30 @@ export function MediaManager(props: {
                 onChange={(event) => uploadBanner(event.target.files)}
                 className="block text-xs text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-xs file:text-white"
               />
-              <button
-                type="button"
-                onClick={() => removeMedia(media.bannerPath!, "banner")}
-                className="text-xs text-rose-600 hover:text-rose-700"
-              >
-                Remove banner
-              </button>
+              {media.bannerPath && (
+                <button
+                  type="button"
+                  onClick={() => removeMedia(media.bannerPath!, "banner")}
+                  className="text-xs text-rose-600 hover:text-rose-700"
+                >
+                  Remove banner
+                </button>
+              )}
             </div>
           </div>
         ) : (
-          <input
-            ref={bannerInput}
-            type="file"
-            accept="image/*"
-            onChange={(event) => uploadBanner(event.target.files)}
-            className="mt-3 block w-full text-xs text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-xs file:text-white"
-          />
+          <div>
+            <p className="mt-2 text-xs text-muted">
+              No banner and no photos yet — the carousel shows a compact card until one is added.
+            </p>
+            <input
+              ref={bannerInput}
+              type="file"
+              accept="image/*"
+              onChange={(event) => uploadBanner(event.target.files)}
+              className="mt-3 block w-full text-xs text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-xs file:text-white"
+            />
+          </div>
         )}
       </div>
 

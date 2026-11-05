@@ -2,8 +2,11 @@ import Link from "next/link";
 import { BusinessForm } from "@/components/BusinessForm";
 import { changePassword } from "@/lib/actions/auth";
 import { createBusinessAction, setPaidAction, setStatusAction } from "@/lib/actions/businesses";
+import { setOverlayBgModeAction } from "@/lib/actions/settings";
 import { listBusinesses } from "@/lib/data";
 import { listMetricTotals } from "@/lib/metrics";
+import { listPayments } from "@/lib/payments";
+import { getOverlayBgMode } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +15,19 @@ const statusStyles: Record<string, string> = {
   approved: "bg-amber-50 text-amber-700 border-amber-200",
   submitted: "bg-slate-50 text-slate-600 border-slate-200",
   expired: "bg-stone-100 text-stone-500 border-stone-200",
+};
+
+const PACKAGE_LABELS: Record<string, string> = {
+  basic_5k: "Community listing",
+  premium_10k: "Featured partner",
+  poll_quiz: "Poll/quiz add-on",
+};
+
+const PAYMENT_STYLES: Record<string, string> = {
+  paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  pending: "bg-amber-50 text-amber-700 border-amber-200",
+  failed: "bg-rose-50 text-rose-700 border-rose-200",
+  abandoned: "bg-slate-50 text-slate-600 border-slate-200",
 };
 
 const paidStyles: Record<string, string> = {
@@ -25,10 +41,12 @@ export default async function AdminPage({
 }: {
   searchParams: Promise<{ notice?: string }>;
 }) {
-  const [{ notice }, businesses, totals] = await Promise.all([
+  const [{ notice }, businesses, totals, overlayMode, payments] = await Promise.all([
     searchParams,
     listBusinesses(),
     listMetricTotals(),
+    getOverlayBgMode(),
+    listPayments(15),
   ]);
 
   const liveCount = businesses.filter((business) => business.status === "live").length;
@@ -51,6 +69,100 @@ export default async function AdminPage({
       {notice && (
         <p className="rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink">{notice}</p>
       )}
+
+      <section className="rounded-2xl border border-line bg-surface p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-2xl">
+            <h2 className="font-display text-lg text-ink">Overlay &amp; broadcast</h2>
+            <p className="mt-1 text-sm leading-relaxed text-muted">
+              Sets the background on <code className="text-ink">/overlay</code>.{" "}
+              <strong className="text-ink">Transparent</strong> is for OBS/vMix, where the ads
+              composite over the video feed.{" "}
+              <strong className="text-ink">Creative</strong> paints the brand gradient with the
+              current banner behind the ad — for a browser preview or a TV screen. The overlay
+              itself has no switch, so nothing can change mid-broadcast.
+            </p>
+            <p className="mt-2 text-xs text-muted">
+              Current: <span className="font-medium text-ink">{overlayMode}</span> ·{" "}
+              <Link href="/overlay" className="text-brand hover:text-brand-ink">
+                Open /overlay
+              </Link>{" "}
+              ·{" "}
+              <Link href="/overlay?bg=creative" className="text-brand hover:text-brand-ink">
+                Preview creative
+              </Link>
+            </p>
+          </div>
+
+          <form action={setOverlayBgModeAction} className="shrink-0">
+            <input
+              type="hidden"
+              name="mode"
+              value={overlayMode === "creative" ? "transparent" : "creative"}
+            />
+            <button
+              type="submit"
+              className="rounded-full border border-brand px-5 py-2.5 text-sm font-medium text-brand transition-colors hover:bg-brand hover:text-white"
+            >
+              {overlayMode === "creative" ? "Switch to transparent" : "Switch to creative"}
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-line bg-surface p-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-lg text-ink">Payments</h2>
+          <p className="text-xs text-muted">
+            {payments.filter((payment) => payment.status === "paid").length} paid ·{" "}
+            {payments.filter((payment) => payment.status === "pending").length} pending
+          </p>
+        </div>
+
+        {payments.length === 0 ? (
+          <p className="mt-3 text-sm text-muted">
+            No payments yet. Checkout payments land here once someone buys a package.
+          </p>
+        ) : (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="text-xs uppercase tracking-wider text-muted">
+                <tr>
+                  <th className="py-2 pr-4 font-medium">When</th>
+                  <th className="py-2 pr-4 font-medium">Reference</th>
+                  <th className="py-2 pr-4 font-medium">Package</th>
+                  <th className="py-2 pr-4 font-medium">Buyer</th>
+                  <th className="py-2 pr-4 font-medium">Amount</th>
+                  <th className="py-2 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {payments.map((payment) => (
+                  <tr key={payment.id} className="align-top">
+                    <td className="py-2 pr-4 text-muted">
+                      {new Date(payment.createdAt).toLocaleString("en-KE")}
+                    </td>
+                    <td className="py-2 pr-4 font-mono text-xs">{payment.reference}</td>
+                    <td className="py-2 pr-4">{PACKAGE_LABELS[payment.package] ?? payment.package}</td>
+                    <td className="py-2 pr-4">
+                      {payment.buyerName ?? "—"}
+                      <span className="block text-xs text-muted">{payment.buyerEmail}</span>
+                    </td>
+                    <td className="py-2 pr-4">KES {payment.amountKes.toLocaleString()}</td>
+                    <td className="py-2">
+                      <span
+                        className={`rounded-full border px-2.5 py-1 text-xs ${PAYMENT_STYLES[payment.status]}`}
+                      >
+                        {payment.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       <details className="rounded-2xl border border-line bg-surface p-5">
         <summary className="cursor-pointer text-sm font-medium text-brand">

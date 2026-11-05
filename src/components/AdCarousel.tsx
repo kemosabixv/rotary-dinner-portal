@@ -31,10 +31,12 @@ export function AdCarousel({
   items,
   variant = "panel",
   intervalMs = 6000,
+  backgroundMode = "transparent",
 }: {
   items: CarouselItem[];
   variant?: "panel" | "overlay";
   intervalMs?: number;
+  backgroundMode?: "transparent" | "creative";
 }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -148,6 +150,23 @@ export function AdCarousel({
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
+      {overlay && backgroundMode === "creative" && (
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0b1b3a] via-[#122b52] to-[#17458f]" />
+          {item.bannerUrl && (
+            <Image
+              src={item.bannerUrl}
+              alt=""
+              fill
+              sizes="100vw"
+              className="scale-110 object-cover opacity-40 blur-2xl"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0b1b3a]/75 via-[#0b1b3a]/25 to-[#17458f]/70" />
+          <div className="absolute inset-x-0 bottom-0 h-1.5 bg-gradient-to-r from-[#c98a2e] via-[#e0a93f] to-transparent" />
+        </div>
+      )}
+
       {item.bannerUrl ? (
         <div className="relative aspect-[8/3] w-full">
           <Image

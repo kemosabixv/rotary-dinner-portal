@@ -16,6 +16,7 @@ Scope decisions live in `..\Advertising Portal — Scope & Build Plan.md`.
 | Media | Supabase Storage, public bucket `business-media` |
 | Auth | Supabase Auth, **email + password** sessions (no magic links), admin-only, no sign-up |
 | Email | Resend — coupon delivery; without `RESEND_API_KEY` the code is shown on screen |
+| Payments | **Paystack** hosted checkout (M-Pesa 1.5% / cards 2.9%, district absorbs the fee); webhook is the source of truth; Paybill stays as the manual alternative |
 | Payments | Offline: M-Pesa Paybill + manual reconciliation; admin records `paidStatus` |
 
 ## Brand
@@ -59,6 +60,20 @@ otherwise the portal shows it on screen and records `coupon_email_status = skipp
   repoId: 1447246100, ref: "master" }`).
 - **Custom domain:** not attached. Add it in Vercel → Domains, then create the CNAME in Azure DNS.
 
+## Payments
+
+Self-serve checkout on `/advertise` → `/advertise/checkout` → **Paystack hosted page** (M-Pesa or
+card) → `/advertise/thanks?ref=…`. The **webhook is the source of truth**: Paystack signs the raw
+body with HMAC-SHA512, and each payment carries a `verify_token` that travels to Paystack in
+transaction metadata and back, so only the real webhook can flip a payment to `paid`.
+
+- Env: `PAYSTACK_SECRET_KEY` (server-only). Currently **test keys**; swap to live when the district
+  account is KYC'd. `PAYSTACK_WEBHOOK_SECRET` overrides the signing secret if one is set.
+- **Webhook URL to configure in the Paystack dashboard:** `https://<host>/api/paystack/webhook`
+- Fees are absorbed: KES 5,000 → 4,925, KES 10,000 → 9,850. Settlement T+2 to bank or M-Pesa.
+- Admin shows the payments list (reference, buyer, amount, status). Paybill remains as the manual
+  alternative for anyone who prefers it.
+
 ## Run locally
 
 ```bash
@@ -80,6 +95,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 |---|---|
 | `/` | Landing page: hero, live carousel, how it works |
 | `/advertise` | Package tiers (from `src/data/packages.json`), add-on, what we need from businesses |
+| `/advertise/checkout` | Self-serve checkout form → Paystack hosted payment |
+| `/advertise/thanks` | Payment receipt / status by reference |
+| `/api/paystack/webhook` | Paystack webhook (HMAC-verified) — marks payments paid |
 | `/businesses` | Public directory, filterable by category |
 | `/businesses/[slug]` | A single listing (only `status = 'live'` is publicly readable) |
 | `/overlay` | Transparent-background carousel for OBS / vMix browser source |
