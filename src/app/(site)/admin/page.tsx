@@ -82,15 +82,22 @@ export default async function AdminPage({
               current banner behind the ad — for a browser preview or a TV screen. The overlay
               itself has no switch, so nothing can change mid-broadcast.
             </p>
-            <p className="mt-2 text-xs text-muted">
-              Current: <span className="font-medium text-ink">{overlayMode}</span> ·{" "}
-              <Link href="/overlay" className="text-brand hover:text-brand-ink">
-                Open /overlay
-              </Link>{" "}
-              ·{" "}
-              <Link href="/overlay?bg=creative" className="text-brand hover:text-brand-ink">
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link
+                href="/overlay"
+                className="rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-ink"
+              >
+                Open overlay
+              </Link>
+              <Link
+                href="/overlay?bg=creative"
+                className="rounded-full border border-line px-5 py-2.5 text-sm text-muted transition-colors hover:border-brand hover:text-brand"
+              >
                 Preview creative
               </Link>
+            </div>
+            <p className="mt-2 text-xs text-muted">
+              Current: <span className="font-medium text-ink">{overlayMode}</span>
             </p>
           </div>
 
