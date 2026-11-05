@@ -114,6 +114,7 @@ export async function updateMediaAction(
     photoPaths: string[];
     videoPath?: string | null;
     videoPosterPath?: string | null;
+    bannerPath?: string | null;
   },
 ) {
   await requireUser();

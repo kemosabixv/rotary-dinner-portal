@@ -23,6 +23,7 @@ export default async function BusinessPage({
   const livePoll = polls[0];
 
   const logo = mediaUrl(business.logoPath);
+  const bannerUrl = mediaUrl(business.bannerPath);
   const videoUrl = mediaUrl(business.videoPath);
   const posterUrl = mediaUrl(business.videoPosterPath);
   const photos = business.photoPaths
@@ -53,6 +54,19 @@ export default async function BusinessPage({
       <Link href="/businesses" className="text-sm text-muted hover:text-brand">
         ← All businesses
       </Link>
+
+      {bannerUrl && (
+        <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-surface">
+          <Image
+            src={bannerUrl}
+            alt={`${business.name} banner`}
+            width={1600}
+            height={600}
+            className="h-auto w-full object-cover"
+            priority
+          />
+        </div>
+      )}
 
       <header className="mt-6 flex flex-wrap items-start gap-6">
         <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-line bg-surface">

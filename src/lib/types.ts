@@ -27,6 +27,8 @@ export type Business = {
   /** Optional short promo video (mp4/webm) and its poster frame. */
   videoPath: string | null;
   videoPosterPath: string | null;
+  /** Wide banner creative used in the carousel and at the top of the listing. */
+  bannerPath: string | null;
   address: string | null;
   mapsUrl: string | null;
   contact: {

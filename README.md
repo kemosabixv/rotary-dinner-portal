@@ -98,9 +98,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 - Businesses send their logo and photos by **WhatsApp or email**. An admin uploads them on the
   business's edit page (`/admin/[id]` → Media). Uploads go straight from the browser to Supabase
   Storage; paths are stored on the row (`logo_path`, `photo_paths`).
-- Limits: images JPG/PNG/WebP up to 5MB (logo + 6 photos); video MP4 (H.264) or WebM up to **15MB**,
-  30 seconds, 1080p, **one per business**, optional poster frame. Video is served straight from storage
-  with `preload="metadata"` — keep clips short because video counts against storage and egress.
+- Limits: images JPG/PNG/WebP up to 5MB (logo + 6 photos + one **banner** at 1600×600); video MP4
+  (H.264) or WebM up to **15MB**, 30 seconds, 1080p, **one per business**, optional poster frame.
+- **Banner** is the ad creative: it fills the home-page carousel and the `/overlay` panel, and sits at
+  the top of the listing. Without one the carousel falls back to a compact logo + text card.
 - Location: `address` + `maps_url` render as a Location block with an "Open in Google Maps" link
   (a plain link — no Maps API key, no embed).
 

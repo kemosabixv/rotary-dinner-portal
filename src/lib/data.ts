@@ -20,6 +20,7 @@ type BusinessRow = {
   photo_paths: string[] | null;
   video_path: string | null;
   video_poster_path: string | null;
+  banner_path: string | null;
   address: string | null;
   maps_url: string | null;
   phone: string | null;
@@ -45,7 +46,7 @@ type BusinessRow = {
 };
 
 const COLUMNS =
-  "id, slug, name, category, tagline, description, services, logo_path, photo_paths, video_path, video_poster_path, address, maps_url, phone, email, website, instagram, facebook, x_url, linkedin, tiktok, youtube, whatsapp, package_tier, paid_status, add_ons, active_from, active_to, status, carousel_weight, is_sample, created_at, updated_at";
+  "id, slug, name, category, tagline, description, services, logo_path, photo_paths, video_path, video_poster_path, banner_path, address, maps_url, phone, email, website, instagram, facebook, x_url, linkedin, tiktok, youtube, whatsapp, package_tier, paid_status, add_ons, active_from, active_to, status, carousel_weight, is_sample, created_at, updated_at";
 
 function toBusiness(row: BusinessRow): Business {
   return {
@@ -60,6 +61,7 @@ function toBusiness(row: BusinessRow): Business {
     photoPaths: row.photo_paths ?? [],
     videoPath: row.video_path,
     videoPosterPath: row.video_poster_path,
+    bannerPath: row.banner_path,
     address: row.address,
     mapsUrl: row.maps_url,
     contact: {
@@ -229,12 +231,14 @@ export async function updateMedia(
     photoPaths: string[];
     videoPath?: string | null;
     videoPosterPath?: string | null;
+    bannerPath?: string | null;
   },
 ): Promise<void> {
   const supabase = await createClient();
   const patch: Record<string, unknown> = { logo_path: media.logoPath, photo_paths: media.photoPaths };
   if (media.videoPath !== undefined) patch.video_path = media.videoPath;
   if (media.videoPosterPath !== undefined) patch.video_poster_path = media.videoPosterPath;
+  if (media.bannerPath !== undefined) patch.banner_path = media.bannerPath;
 
   const { error } = await supabase.from("businesses").update(patch).eq("id", id);
 

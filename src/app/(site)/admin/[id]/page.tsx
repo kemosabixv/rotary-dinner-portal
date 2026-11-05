@@ -121,6 +121,7 @@ export default async function EditBusinessPage({
         photoPaths={business.photoPaths}
         videoPath={business.videoPath}
         videoPosterPath={business.videoPosterPath}
+        bannerPath={business.bannerPath}
       />
 
       <details className="rounded-2xl border border-rose-200 bg-surface p-5">

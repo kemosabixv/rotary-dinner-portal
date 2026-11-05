@@ -12,6 +12,7 @@ export type CarouselItem = {
   category: string;
   tagline: string;
   logoUrl: string | null;
+  bannerUrl: string | null;
 };
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
@@ -46,7 +47,6 @@ export function AdCarousel({
     [items.length],
   );
 
-  // Auto-advance. `index` is a dependency so a manual jump restarts the timer.
   useEffect(() => {
     if (paused || items.length < 2) return;
     const timer = window.setInterval(() => {
@@ -55,7 +55,6 @@ export function AdCarousel({
     return () => window.clearInterval(timer);
   }, [paused, items.length, intervalMs, index]);
 
-  // Keyboard control for the stage/overlay operator.
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.key === "ArrowLeft") go(-1);
@@ -87,105 +86,132 @@ export function AdCarousel({
     ? "flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
     : "flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-brand hover:text-brand";
 
+  const controls = (
+    <div
+      className={
+        overlay
+          ? "mt-4 flex items-center justify-between gap-4"
+          : "flex items-center justify-between gap-4 border-t border-line px-5 py-3"
+      }
+    >
+      <div className="flex items-center gap-2">
+        <button type="button" onClick={() => go(-1)} aria-label="Previous business" className={buttonClass}>
+          <Chevron direction="left" />
+        </button>
+
+        <div className="flex items-center gap-1.5">
+          {items.map((dot, dotIndex) => (
+            <button
+              key={dot.slug}
+              type="button"
+              aria-label={`Show ${dot.name}`}
+              aria-current={dotIndex === index}
+              onClick={() => setIndex(dotIndex)}
+              className={
+                dotIndex === index
+                  ? overlay
+                    ? "h-1.5 w-6 rounded-full bg-white"
+                    : "h-1.5 w-6 rounded-full bg-brand"
+                  : overlay
+                    ? "h-1.5 w-1.5 rounded-full bg-white/40"
+                    : "h-1.5 w-1.5 rounded-full bg-line"
+              }
+            />
+          ))}
+        </div>
+
+        <button type="button" onClick={() => go(1)} aria-label="Next business" className={buttonClass}>
+          <Chevron direction="right" />
+        </button>
+      </div>
+
+      {!overlay && (
+        <Link
+          href={`/businesses/${item.slug}`}
+          className="text-xs font-medium uppercase tracking-wider text-brand hover:text-brand-ink"
+        >
+          View listing →
+        </Link>
+      )}
+    </div>
+  );
+
   return (
     <div
-      className={overlay ? "w-full" : "rounded-2xl border border-line bg-surface p-6 sm:p-8"}
+      className={
+        overlay
+          ? "w-full"
+          : "self-start overflow-hidden rounded-2xl border border-line bg-surface"
+      }
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      <div className="flex items-center gap-5">
-        <div
-          className={
-            overlay
-              ? "flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/90 p-2 shadow-lg"
-              : "flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-paper"
-          }
-        >
-          {item.logoUrl ? (
-            <Image
-              src={item.logoUrl}
-              alt={`${item.name} logo`}
-              width={96}
-              height={96}
-              className="h-full w-full object-contain"
-            />
-          ) : (
-            <span className="font-display text-2xl text-brand">{item.name.slice(0, 1)}</span>
-          )}
-        </div>
+      {item.bannerUrl ? (
+        <div className="relative aspect-[8/3] w-full">
+          <Image
+            src={item.bannerUrl}
+            alt={`${item.name} banner`}
+            fill
+            sizes="(max-width: 768px) 100vw, 640px"
+            className="object-cover"
+            priority={index === 0}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/5" />
 
-        <div className="min-w-0">
-          <p
-            className={
-              overlay
-                ? "text-xs font-medium uppercase tracking-[0.2em] text-white/70"
-                : "text-[11px] uppercase tracking-[0.16em] text-muted"
-            }
-          >
-            {item.category}
-          </p>
-          <p
-            className={
-              overlay
-                ? "font-display text-3xl font-semibold leading-tight text-white drop-shadow"
-                : "font-display text-xl leading-tight text-ink"
-            }
-          >
-            {item.name}
-          </p>
-          <p
-            className={
-              overlay ? "mt-1 max-w-2xl text-base text-white/80" : "mt-1 text-sm text-muted"
-            }
-          >
-            {item.tagline}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={() => go(-1)} aria-label="Previous business" className={buttonClass}>
-            <Chevron direction="left" />
-          </button>
-
-          <div className="flex items-center gap-1.5">
-            {items.map((dot, dotIndex) => (
-              <button
-                key={dot.slug}
-                type="button"
-                aria-label={`Show ${dot.name}`}
-                aria-current={dotIndex === index}
-                onClick={() => setIndex(dotIndex)}
-                className={
-                  dotIndex === index
-                    ? overlay
-                      ? "h-1.5 w-6 rounded-full bg-white"
-                      : "h-1.5 w-6 rounded-full bg-brand"
-                    : overlay
-                      ? "h-1.5 w-1.5 rounded-full bg-white/40"
-                      : "h-1.5 w-1.5 rounded-full bg-line"
-                }
-              />
-            ))}
+          <div className="absolute inset-x-0 bottom-0 flex items-end gap-4 p-5">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/95 p-1.5">
+              {item.logoUrl ? (
+                <Image
+                  src={item.logoUrl}
+                  alt={`${item.name} logo`}
+                  width={56}
+                  height={56}
+                  className="h-full w-full object-contain"
+                />
+              ) : (
+                <span className="font-display text-lg text-brand">{item.name.slice(0, 1)}</span>
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/70">
+                {item.category}
+              </p>
+              <p className="font-display text-2xl font-semibold leading-tight text-white drop-shadow">
+                {item.name}
+              </p>
+              <p className="mt-0.5 line-clamp-1 text-sm text-white/80">{item.tagline}</p>
+            </div>
           </div>
-
-          <button type="button" onClick={() => go(1)} aria-label="Next business" className={buttonClass}>
-            <Chevron direction="right" />
-          </button>
         </div>
+      ) : (
+        <div className="p-6 sm:p-8">
+          <div className="flex items-center gap-5">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-paper">
+              {item.logoUrl ? (
+                <Image
+                  src={item.logoUrl}
+                  alt={`${item.name} logo`}
+                  width={64}
+                  height={64}
+                  className="h-full w-full object-contain"
+                />
+              ) : (
+                <span className="font-display text-2xl text-brand">{item.name.slice(0, 1)}</span>
+              )}
+            </div>
 
-        {!overlay && (
-          <Link
-            href={`/businesses/${item.slug}`}
-            className="text-xs font-medium uppercase tracking-wider text-brand hover:text-brand-ink"
-          >
-            View listing →
-          </Link>
-        )}
-      </div>
+            <div className="min-w-0">
+              <p className="text-[11px] uppercase tracking-[0.16em] text-muted">{item.category}</p>
+              <p className="font-display text-xl leading-tight text-ink">{item.name}</p>
+              <p className="mt-1 text-sm text-muted">{item.tagline}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {controls}
     </div>
   );
 }

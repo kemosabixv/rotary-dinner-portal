@@ -14,6 +14,7 @@ type MediaState = {
   photoPaths: string[];
   videoPath: string | null;
   videoPosterPath: string | null;
+  bannerPath: string | null;
 };
 
 export function MediaManager(props: {
@@ -22,12 +23,14 @@ export function MediaManager(props: {
   photoPaths: string[];
   videoPath?: string | null;
   videoPosterPath?: string | null;
+  bannerPath?: string | null;
 }) {
   const [media, setMedia] = useState<MediaState>({
     logoPath: props.logoPath,
     photoPaths: props.photoPaths,
     videoPath: props.videoPath ?? null,
     videoPosterPath: props.videoPosterPath ?? null,
+    bannerPath: props.bannerPath ?? null,
   });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -37,6 +40,7 @@ export function MediaManager(props: {
   const photoInput = useRef<HTMLInputElement>(null);
   const videoInput = useRef<HTMLInputElement>(null);
   const posterInput = useRef<HTMLInputElement>(null);
+  const bannerInput = useRef<HTMLInputElement>(null);
 
   function persist(next: MediaState) {
     setMedia(next);
@@ -146,7 +150,31 @@ export function MediaManager(props: {
     if (posterInput.current) posterInput.current.value = "";
   }
 
-  async function removeMedia(path: string, kind: "logo" | "photo" | "video" | "poster") {
+  async function uploadBanner(files: FileList | null) {
+    const file = files?.[0];
+    if (!file) return;
+    setError(null);
+
+    if (!file.type.startsWith("image/")) {
+      setError("Banner must be an image.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      setError(`${file.name} is larger than 5MB.`);
+      return;
+    }
+
+    setBusy(file.name);
+    const path = await store(file, "banner");
+    setBusy(null);
+    if (!path) return;
+
+    if (media.bannerPath) await drop(media.bannerPath);
+    persist({ ...media, bannerPath: path });
+    if (bannerInput.current) bannerInput.current.value = "";
+  }
+
+  async function removeMedia(path: string, kind: "logo" | "photo" | "video" | "poster" | "banner") {
     setError(null);
     await drop(path);
 
@@ -155,7 +183,8 @@ export function MediaManager(props: {
     else if (kind === "video") {
       if (media.videoPosterPath) await drop(media.videoPosterPath);
       persist({ ...media, videoPath: null, videoPosterPath: null });
-    } else persist({ ...media, videoPosterPath: null });
+    } else if (kind === "banner") persist({ ...media, bannerPath: null });
+    else persist({ ...media, videoPosterPath: null });
   }
 
   const videoUrl = mediaUrl(media.videoPath);
@@ -236,6 +265,49 @@ export function MediaManager(props: {
             className="mt-3 block w-full text-xs text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-xs file:text-white"
           />
         </div>
+      </div>
+
+      <div className="border-t border-line pt-6">
+        <p className="text-sm font-medium text-ink">Banner creative</p>
+        <p className="mt-1 text-xs text-muted">
+          This is what fills the carousel on the home page and the overlay. 1600 × 600 px (8:3),
+          JPG/PNG/WebP, max 5MB. Without one, the carousel falls back to a compact logo + text card.
+        </p>
+
+        {media.bannerPath ? (
+          <div className="mt-3 space-y-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={mediaUrl(media.bannerPath) ?? ""}
+              alt="Banner creative"
+              className="w-full max-w-xl rounded-xl border border-line object-cover"
+            />
+            <div className="flex flex-wrap items-center gap-4">
+              <input
+                ref={bannerInput}
+                type="file"
+                accept="image/*"
+                onChange={(event) => uploadBanner(event.target.files)}
+                className="block text-xs text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-xs file:text-white"
+              />
+              <button
+                type="button"
+                onClick={() => removeMedia(media.bannerPath!, "banner")}
+                className="text-xs text-rose-600 hover:text-rose-700"
+              >
+                Remove banner
+              </button>
+            </div>
+          </div>
+        ) : (
+          <input
+            ref={bannerInput}
+            type="file"
+            accept="image/*"
+            onChange={(event) => uploadBanner(event.target.files)}
+            className="mt-3 block w-full text-xs text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-xs file:text-white"
+          />
+        )}
       </div>
 
       <div className="border-t border-line pt-6">

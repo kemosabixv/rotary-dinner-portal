@@ -20,6 +20,7 @@ export default async function OverlayPage() {
     category: business.category,
     tagline: business.tagline,
     logoUrl: mediaUrl(business.logoPath),
+    bannerUrl: mediaUrl(business.bannerPath),
   }));
 
   return (
