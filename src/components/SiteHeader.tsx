@@ -18,7 +18,7 @@ export function SiteHeader() {
             width={1281}
             height={353}
             priority
-            className="h-8 w-auto sm:h-10"
+            className="h-10 w-auto sm:h-12"
           />
           <span className="hidden text-[10px] font-medium uppercase tracking-[0.2em] text-muted xl:inline">
             Foundation Dinner 2026
