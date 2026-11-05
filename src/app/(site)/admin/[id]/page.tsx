@@ -63,6 +63,8 @@ export default async function EditBusinessPage({
         businessId={business.id}
         logoPath={business.logoPath}
         photoPaths={business.photoPaths}
+        videoPath={business.videoPath}
+        videoPosterPath={business.videoPosterPath}
       />
 
       <details className="rounded-2xl border border-rose-200 bg-surface p-5">

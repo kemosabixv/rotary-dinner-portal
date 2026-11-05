@@ -2,6 +2,16 @@ export type PackageTier = "basic_5k" | "premium_10k" | "sponsor" | "comp";
 export type PaidStatus = "pending" | "paid" | "waived";
 export type BusinessStatus = "submitted" | "approved" | "live" | "expired";
 
+export type SocialLinks = {
+  instagram?: string;
+  facebook?: string;
+  x?: string;
+  linkedin?: string;
+  tiktok?: string;
+  youtube?: string;
+  whatsapp?: string;
+};
+
 export type Business = {
   id: string;
   slug: string;
@@ -14,11 +24,16 @@ export type Business = {
   logoPath: string | null;
   /** Supabase Storage object paths, in display order. */
   photoPaths: string[];
+  /** Optional short promo video (mp4/webm) and its poster frame. */
+  videoPath: string | null;
+  videoPosterPath: string | null;
+  address: string | null;
+  mapsUrl: string | null;
   contact: {
     phone?: string;
     email?: string;
     website?: string;
-    socials?: string;
+    socials: SocialLinks;
   };
   packageTier: PackageTier;
   paidStatus: PaidStatus;
@@ -65,10 +80,12 @@ export type BusinessInput = {
   tagline: string;
   description: string;
   services: string[];
+  address?: string;
+  mapsUrl?: string;
   phone?: string;
   email?: string;
   website?: string;
-  socials?: string;
+  socials?: SocialLinks;
   packageTier: PackageTier;
   paidStatus: PaidStatus;
   status: BusinessStatus;

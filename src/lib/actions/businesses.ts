@@ -28,10 +28,20 @@ function parseBusinessForm(formData: FormData): BusinessInput {
     tagline: String(formData.get("tagline") ?? "").trim(),
     description: String(formData.get("description") ?? "").trim(),
     services,
+    address: String(formData.get("address") ?? "").trim() || undefined,
+    mapsUrl: String(formData.get("mapsUrl") ?? "").trim() || undefined,
     phone: String(formData.get("phone") ?? "").trim() || undefined,
     email: String(formData.get("email") ?? "").trim() || undefined,
     website: String(formData.get("website") ?? "").trim() || undefined,
-    socials: String(formData.get("socials") ?? "").trim() || undefined,
+    socials: {
+      instagram: String(formData.get("instagram") ?? "").trim() || undefined,
+      facebook: String(formData.get("facebook") ?? "").trim() || undefined,
+      x: String(formData.get("x_url") ?? "").trim() || undefined,
+      linkedin: String(formData.get("linkedin") ?? "").trim() || undefined,
+      tiktok: String(formData.get("tiktok") ?? "").trim() || undefined,
+      youtube: String(formData.get("youtube") ?? "").trim() || undefined,
+      whatsapp: String(formData.get("whatsapp") ?? "").trim() || undefined,
+    },
     packageTier: (String(formData.get("packageTier") ?? "basic_5k") as PackageTier) ?? "basic_5k",
     paidStatus: (String(formData.get("paidStatus") ?? "pending") as PaidStatus) ?? "pending",
     status: (String(formData.get("status") ?? "submitted") as BusinessStatus) ?? "submitted",
@@ -99,7 +109,12 @@ export async function setPaidAction(formData: FormData) {
 
 export async function updateMediaAction(
   id: string,
-  media: { logoPath: string | null; photoPaths: string[] },
+  media: {
+    logoPath: string | null;
+    photoPaths: string[];
+    videoPath?: string | null;
+    videoPosterPath?: string | null;
+  },
 ) {
   await requireUser();
   await updateMedia(id, media);

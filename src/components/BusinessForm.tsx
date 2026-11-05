@@ -84,6 +84,27 @@ export function BusinessForm({
         />
       </label>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className={labelClass}>
+          Address / location
+          <input
+            name="address"
+            defaultValue={defaults.address}
+            placeholder="Riverside Drive, Nairobi"
+            className={fieldClass}
+          />
+        </label>
+        <label className={labelClass}>
+          Google Maps link
+          <input
+            name="mapsUrl"
+            defaultValue={defaults.mapsUrl}
+            placeholder="https://maps.app.goo.gl/…"
+            className={fieldClass}
+          />
+        </label>
+      </div>
+
       <fieldset className="grid gap-4 sm:grid-cols-2">
         <legend className="mb-2 text-sm font-medium text-ink">Contact</legend>
         <label className={labelClass}>
@@ -98,9 +119,74 @@ export function BusinessForm({
           Website
           <input name="website" defaultValue={defaults.website} className={fieldClass} />
         </label>
+      </fieldset>
+
+      <fieldset className="grid gap-4 sm:grid-cols-2">
+        <legend className="mb-2 text-sm font-medium text-ink">
+          Social links (full URL, or a phone number for WhatsApp)
+        </legend>
         <label className={labelClass}>
-          Social handle
-          <input name="socials" defaultValue={defaults.socials} className={fieldClass} />
+          Instagram
+          <input
+            name="instagram"
+            defaultValue={defaults.socials?.instagram}
+            placeholder="https://instagram.com/…"
+            className={fieldClass}
+          />
+        </label>
+        <label className={labelClass}>
+          Facebook
+          <input
+            name="facebook"
+            defaultValue={defaults.socials?.facebook}
+            placeholder="https://facebook.com/…"
+            className={fieldClass}
+          />
+        </label>
+        <label className={labelClass}>
+          X
+          <input
+            name="x_url"
+            defaultValue={defaults.socials?.x}
+            placeholder="https://x.com/…"
+            className={fieldClass}
+          />
+        </label>
+        <label className={labelClass}>
+          LinkedIn
+          <input
+            name="linkedin"
+            defaultValue={defaults.socials?.linkedin}
+            placeholder="https://linkedin.com/company/…"
+            className={fieldClass}
+          />
+        </label>
+        <label className={labelClass}>
+          TikTok
+          <input
+            name="tiktok"
+            defaultValue={defaults.socials?.tiktok}
+            placeholder="https://tiktok.com/@…"
+            className={fieldClass}
+          />
+        </label>
+        <label className={labelClass}>
+          YouTube
+          <input
+            name="youtube"
+            defaultValue={defaults.socials?.youtube}
+            placeholder="https://youtube.com/@…"
+            className={fieldClass}
+          />
+        </label>
+        <label className={labelClass}>
+          WhatsApp
+          <input
+            name="whatsapp"
+            defaultValue={defaults.socials?.whatsapp}
+            placeholder="+254 700 000 000"
+            className={fieldClass}
+          />
         </label>
       </fieldset>
 

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SocialLinks } from "@/components/SocialLinks";
 import { TrackEvent, TrackedLink } from "@/components/Tracking";
 import { getBusinessBySlug } from "@/lib/data";
 import { mediaUrl } from "@/lib/media";
@@ -22,6 +23,8 @@ export default async function BusinessPage({
   const livePoll = polls[0];
 
   const logo = mediaUrl(business.logoPath);
+  const videoUrl = mediaUrl(business.videoPath);
+  const posterUrl = mediaUrl(business.videoPosterPath);
   const photos = business.photoPaths
     .map((path) => mediaUrl(path))
     .filter((url): url is string => Boolean(url));
@@ -41,11 +44,6 @@ export default async function BusinessPage({
       label: "Website",
       value: business.contact.website.replace(/^https?:\/\//, ""),
       href: business.contact.website,
-    },
-    business.contact.socials && {
-      label: "Social",
-      value: business.contact.socials,
-      href: undefined,
     },
   ].filter(Boolean) as Array<{ label: string; value: string; href?: string }>;
 
@@ -102,6 +100,20 @@ export default async function BusinessPage({
             </div>
           )}
 
+          {videoUrl && (
+            <div className="mt-8">
+              <h2 className="font-display text-lg text-ink">Video</h2>
+              <video
+                src={videoUrl}
+                poster={posterUrl ?? undefined}
+                controls
+                preload="metadata"
+                playsInline
+                className="mt-3 w-full rounded-2xl border border-line bg-black"
+              />
+            </div>
+          )}
+
           {photos.length > 0 && (
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               {photos.map((photo) => (
@@ -144,6 +156,26 @@ export default async function BusinessPage({
               </li>
             ))}
           </ul>
+
+          <SocialLinks businessId={business.id} socials={business.contact.socials} />
+
+          {business.address && (
+            <div className="mt-5 border-t border-line pt-4">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-muted">Location</p>
+              <p className="mt-1 text-sm text-ink">{business.address}</p>
+              {business.mapsUrl && (
+                <TrackedLink
+                  businessId={business.id}
+                  href={business.mapsUrl}
+                  source="contact:maps"
+                  external
+                  className="mt-1 inline-flex text-sm text-brand hover:text-brand-ink"
+                >
+                  Open in Google Maps →
+                </TrackedLink>
+              )}
+            </div>
+          )}
 
           {livePoll && (
             <div className="mt-6 rounded-xl border border-brand/20 bg-brand-soft/50 p-4">

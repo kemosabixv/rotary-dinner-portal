@@ -18,10 +18,20 @@ type BusinessRow = {
   services: string[] | null;
   logo_path: string | null;
   photo_paths: string[] | null;
+  video_path: string | null;
+  video_poster_path: string | null;
+  address: string | null;
+  maps_url: string | null;
   phone: string | null;
   email: string | null;
   website: string | null;
-  socials: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  x_url: string | null;
+  linkedin: string | null;
+  tiktok: string | null;
+  youtube: string | null;
+  whatsapp: string | null;
   package_tier: PackageTier;
   paid_status: PaidStatus;
   add_ons: string[] | null;
@@ -35,7 +45,7 @@ type BusinessRow = {
 };
 
 const COLUMNS =
-  "id, slug, name, category, tagline, description, services, logo_path, photo_paths, phone, email, website, socials, package_tier, paid_status, add_ons, active_from, active_to, status, carousel_weight, is_sample, created_at, updated_at";
+  "id, slug, name, category, tagline, description, services, logo_path, photo_paths, video_path, video_poster_path, address, maps_url, phone, email, website, instagram, facebook, x_url, linkedin, tiktok, youtube, whatsapp, package_tier, paid_status, add_ons, active_from, active_to, status, carousel_weight, is_sample, created_at, updated_at";
 
 function toBusiness(row: BusinessRow): Business {
   return {
@@ -48,11 +58,23 @@ function toBusiness(row: BusinessRow): Business {
     services: row.services ?? [],
     logoPath: row.logo_path,
     photoPaths: row.photo_paths ?? [],
+    videoPath: row.video_path,
+    videoPosterPath: row.video_poster_path,
+    address: row.address,
+    mapsUrl: row.maps_url,
     contact: {
       phone: row.phone ?? undefined,
       email: row.email ?? undefined,
       website: row.website ?? undefined,
-      socials: row.socials ?? undefined,
+      socials: {
+        instagram: row.instagram ?? undefined,
+        facebook: row.facebook ?? undefined,
+        x: row.x_url ?? undefined,
+        linkedin: row.linkedin ?? undefined,
+        tiktok: row.tiktok ?? undefined,
+        youtube: row.youtube ?? undefined,
+        whatsapp: row.whatsapp ?? undefined,
+      },
     },
     packageTier: row.package_tier,
     paidStatus: row.paid_status,
@@ -140,10 +162,18 @@ function toRow(input: BusinessInput) {
     tagline: input.tagline,
     description: input.description,
     services: input.services,
+    address: input.address || null,
+    maps_url: input.mapsUrl || null,
     phone: input.phone || null,
     email: input.email || null,
     website: input.website || null,
-    socials: input.socials || null,
+    instagram: input.socials?.instagram || null,
+    facebook: input.socials?.facebook || null,
+    x_url: input.socials?.x || null,
+    linkedin: input.socials?.linkedin || null,
+    tiktok: input.socials?.tiktok || null,
+    youtube: input.socials?.youtube || null,
+    whatsapp: input.socials?.whatsapp || null,
     package_tier: input.packageTier,
     paid_status: input.paidStatus,
     add_ons: input.pollQuiz ? ["poll_quiz"] : [],
@@ -194,13 +224,19 @@ export async function setPaidStatus(id: string, paidStatus: PaidStatus): Promise
 
 export async function updateMedia(
   id: string,
-  media: { logoPath: string | null; photoPaths: string[] },
+  media: {
+    logoPath: string | null;
+    photoPaths: string[];
+    videoPath?: string | null;
+    videoPosterPath?: string | null;
+  },
 ): Promise<void> {
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("businesses")
-    .update({ logo_path: media.logoPath, photo_paths: media.photoPaths })
-    .eq("id", id);
+  const patch: Record<string, unknown> = { logo_path: media.logoPath, photo_paths: media.photoPaths };
+  if (media.videoPath !== undefined) patch.video_path = media.videoPath;
+  if (media.videoPosterPath !== undefined) patch.video_poster_path = media.videoPosterPath;
+
+  const { error } = await supabase.from("businesses").update(patch).eq("id", id);
 
   if (error) throw new Error(`Could not save media: ${error.message}`);
 }

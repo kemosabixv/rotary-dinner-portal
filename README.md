@@ -33,7 +33,8 @@ D9215 + The Rotary Foundation lockup:
 | `--line` | `#d5dced` | Borders |
 | Fonts | **Archivo** (display) · **Public Sans** (body) | via `next/font` |
 
-Assets: `public/brand/rotary-d9215-trf.png` (header lockup) and `src/app/icon.png` (wheel favicon).
+Assets: `public/brand/rotary-d9215-trf.png` (header lockup), `src/app/icon.png` (gold wheel on Rotary
+blue, 512px) and `src/app/apple-icon.png` (180px).
 
 ## Email (coupon codes)
 
@@ -85,13 +86,18 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 - Businesses send their logo and photos by **WhatsApp or email**. An admin uploads them on the
   business's edit page (`/admin/[id]` → Media). Uploads go straight from the browser to Supabase
   Storage; paths are stored on the row (`logo_path`, `photo_paths`).
-- Limits: images only, 5MB per file, up to 6 photos per business.
+- Limits: images JPG/PNG/WebP up to 5MB (logo + 6 photos); video MP4 (H.264) or WebM up to **15MB**,
+  30 seconds, 1080p, **one per business**, optional poster frame. Video is served straight from storage
+  with `preload="metadata"` — keep clips short because video counts against storage and egress.
+- Location: `address` + `maps_url` render as a Location block with an "Open in Google Maps" link
+  (a plain link — no Maps API key, no embed).
 
 ## Data model
 
 `public.businesses` — one row per listing. Key columns: `slug` (unique), `status`
 (`submitted`/`approved`/`live`/`expired`), `paid_status`, `package_tier`, `carousel_weight` (1–5),
-`active_from`/`active_to`, `logo_path`, `photo_paths`, `is_sample`.
+`active_from`/`active_to`, `logo_path`, `photo_paths`, `video_path`, `video_poster_path`, `address`,
+`maps_url`, `instagram`/`facebook`/`x_url`/`linkedin`/`tiktok`/`youtube`/`whatsapp`, `is_sample`.
 
 RLS:
 
