@@ -32,11 +32,14 @@ export function AdCarousel({
   variant = "panel",
   intervalMs = 6000,
   backgroundMode = "transparent",
+  trackImpressions = true,
 }: {
   items: CarouselItem[];
   variant?: "panel" | "overlay";
   intervalMs?: number;
   backgroundMode?: "transparent" | "creative";
+  /** Stage/overlay displays should not inflate listing analytics. */
+  trackImpressions?: boolean;
 }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -69,9 +72,9 @@ export function AdCarousel({
   const activeId = items[index]?.id;
 
   useEffect(() => {
-    if (!activeId) return;
+    if (!activeId || !trackImpressions) return;
     trackEvent({ businessId: activeId, kind: "impression", source: "carousel" });
-  }, [activeId]);
+  }, [activeId, trackImpressions]);
 
   if (items.length === 0) {
     return (
@@ -83,90 +86,131 @@ export function AdCarousel({
 
   const item = items[index];
   const overlay = variant === "overlay";
+  const creative = overlay && backgroundMode === "creative";
 
-  const buttonClass = overlay
-    ? "flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
-    : "flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-brand hover:text-brand";
-
-  const controls = (
-    <div
-      className={
-        overlay
-          ? "mt-4 flex items-center justify-between gap-4"
-          : "flex items-center justify-between gap-4 border-t border-line px-5 py-3"
-      }
-    >
-      <div className="flex items-center gap-2">
-        <button type="button" onClick={() => go(-1)} aria-label="Previous business" className={buttonClass}>
-          <Chevron direction="left" />
-        </button>
-
-        <div className="flex items-center gap-1.5">
-          {items.map((dot, dotIndex) => (
-            <button
-              key={dot.slug}
-              type="button"
-              aria-label={`Show ${dot.name}`}
-              aria-current={dotIndex === index}
-              onClick={() => setIndex(dotIndex)}
-              className={
-                dotIndex === index
-                  ? overlay
-                    ? "h-1.5 w-6 rounded-full bg-white"
-                    : "h-1.5 w-6 rounded-full bg-brand"
-                  : overlay
-                    ? "h-1.5 w-1.5 rounded-full bg-white/40"
-                    : "h-1.5 w-1.5 rounded-full bg-line"
-              }
-            />
-          ))}
-        </div>
-
-        <button type="button" onClick={() => go(1)} aria-label="Next business" className={buttonClass}>
-          <Chevron direction="right" />
-        </button>
-      </div>
-
-      {!overlay && (
-        <Link
-          href={`/businesses/${item.slug}`}
-          className="text-xs font-medium uppercase tracking-wider text-brand hover:text-brand-ink"
-        >
-          View listing →
-        </Link>
-      )}
+  const dots = (tone: "dark" | "light") => (
+    <div className="flex items-center gap-1.5">
+      {items.map((dot, dotIndex) => (
+        <button
+          key={dot.slug}
+          type="button"
+          aria-label={`Show ${dot.name}`}
+          aria-current={dotIndex === index}
+          onClick={() => setIndex(dotIndex)}
+          className={
+            dotIndex === index
+              ? tone === "light"
+                ? "h-1.5 w-6 rounded-full bg-white"
+                : "h-1.5 w-6 rounded-full bg-brand"
+              : tone === "light"
+                ? "h-1.5 w-1.5 rounded-full bg-white/40"
+                : "h-1.5 w-1.5 rounded-full bg-line"
+          }
+        />
+      ))}
     </div>
   );
+
+  const buttonClass = (tone: "dark" | "light") =>
+    tone === "light"
+      ? "flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
+      : "flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-brand hover:text-brand";
+
+  // Creative mode: the slide *is* the screen. No card, no panel.
+  if (creative) {
+    return (
+      <div
+        className="fixed inset-0 z-0 overflow-hidden"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        {item.bannerUrl ? (
+          <Image
+            src={item.bannerUrl}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0b1b3a] via-[#122b52] to-[#17458f]" />
+        )}
+
+        {/* Lighter scrim when the artwork speaks for itself; heavier over the gradient poster */}
+        <div
+          className={`absolute inset-0 ${
+            item.bannerUrl
+              ? "bg-gradient-to-b from-black/45 via-black/10 to-black/60"
+              : "bg-gradient-to-b from-black/30 via-transparent to-black/50"
+          }`}
+        />
+
+        <p className="absolute inset-x-0 top-8 text-center text-[11px] font-medium uppercase tracking-[0.32em] text-white/70">
+          Partner businesses · District 9215 Foundation Dinner
+        </p>
+
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
+          {!item.bannerUrl && (
+            <>
+              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-white/95 p-2 shadow-lg">
+                {item.logoUrl ? (
+                  <Image
+                    src={item.logoUrl}
+                    alt={`${item.name} logo`}
+                    width={80}
+                    height={80}
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <span className="font-display text-2xl text-brand">{item.name.slice(0, 1)}</span>
+                )}
+              </div>
+
+              <p className="mt-6 text-xs font-medium uppercase tracking-[0.28em] text-white/70">
+                {item.category}
+              </p>
+              <h2 className="mt-3 max-w-4xl font-display text-5xl font-semibold leading-tight text-white drop-shadow-lg sm:text-6xl">
+                {item.name}
+              </h2>
+              <p className="mt-3 max-w-2xl text-lg text-white/85 sm:text-xl">{item.tagline}</p>
+            </>
+          )}
+        </div>
+
+        <div className="absolute inset-x-0 bottom-8 flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="Previous business"
+            className={buttonClass("light")}
+          >
+            <Chevron direction="left" />
+          </button>
+          {dots("light")}
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="Next business"
+            className={buttonClass("light")}
+          >
+            <Chevron direction="right" />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       className={
-        overlay
-          ? "w-full"
-          : "self-start overflow-hidden rounded-2xl border border-line bg-surface"
+        overlay ? "w-full" : "self-start overflow-hidden rounded-2xl border border-line bg-surface"
       }
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      {overlay && backgroundMode === "creative" && (
-        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0b1b3a] via-[#122b52] to-[#17458f]" />
-          {item.bannerUrl && (
-            <Image
-              src={item.bannerUrl}
-              alt=""
-              fill
-              sizes="100vw"
-              className="scale-110 object-cover opacity-40 blur-2xl"
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0b1b3a]/75 via-[#0b1b3a]/25 to-[#17458f]/70" />
-          <div className="absolute inset-x-0 bottom-0 h-1.5 bg-gradient-to-r from-[#c98a2e] via-[#e0a93f] to-transparent" />
-        </div>
-      )}
-
       {item.bannerUrl ? (
         <div className="relative aspect-[8/3] w-full">
           <Image
@@ -230,7 +274,44 @@ export function AdCarousel({
         </div>
       )}
 
-      {controls}
+      <div
+        className={
+          overlay
+            ? "mt-4 flex items-center justify-center gap-3"
+            : "flex items-center justify-between gap-4 border-t border-line px-5 py-3"
+        }
+      >
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="Previous business"
+            className={buttonClass(overlay ? "light" : "dark")}
+          >
+            <Chevron direction="left" />
+          </button>
+
+          {dots(overlay ? "light" : "dark")}
+
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="Next business"
+            className={buttonClass(overlay ? "light" : "dark")}
+          >
+            <Chevron direction="right" />
+          </button>
+        </div>
+
+        {!overlay && (
+          <Link
+            href={`/businesses/${item.slug}`}
+            className="text-xs font-medium uppercase tracking-wider text-brand hover:text-brand-ink"
+          >
+            View listing →
+          </Link>
+        )}
+      </div>
     </div>
   );
 }

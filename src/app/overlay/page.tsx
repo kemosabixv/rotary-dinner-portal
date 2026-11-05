@@ -9,9 +9,9 @@ export const dynamic = "force-dynamic";
 /**
  * OBS / vMix browser source.
  *
- * Background is controlled by the admin setting (Overlay & broadcast):
- *   transparent — nothing behind the ad card, for compositing over video
- *   creative    — brand gradient + blurred banner behind the card, for browser/TV
+ * transparent — nothing behind the ad card, for compositing over video
+ * creative    — the slide itself fills the screen (banner or brand gradient),
+ *               for a browser preview or a TV display
  *
  * There is deliberately no on-page switch: nothing here can appear on air.
  * `?bg=creative` or `?bg=transparent` overrides the saved setting for testing.
@@ -39,19 +39,28 @@ export default async function OverlayPage({
     bannerUrl: effectiveBannerUrl(business),
   }));
 
+  if (mode === "creative") {
+    return (
+      <AdCarousel
+        items={items}
+        variant="overlay"
+        intervalMs={8000}
+        backgroundMode="creative"
+        trackImpressions={false}
+      />
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-end justify-start p-10">
-      <div
-        className={
-          mode === "creative"
-            ? "w-full max-w-3xl rounded-3xl bg-black/45 px-8 py-7 shadow-2xl backdrop-blur-sm"
-            : "w-full max-w-3xl rounded-3xl bg-black/35 px-8 py-7 backdrop-blur-sm"
-        }
-      >
-        <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.28em] text-white/60">
-          Partner businesses · District 9215 Foundation Dinner
-        </p>
-        <AdCarousel items={items} variant="overlay" intervalMs={8000} backgroundMode={mode} />
+      <div className="w-full max-w-3xl rounded-3xl bg-black/35 px-8 py-7 backdrop-blur-sm">
+        <AdCarousel
+          items={items}
+          variant="overlay"
+          intervalMs={8000}
+          backgroundMode="transparent"
+          trackImpressions={false}
+        />
       </div>
     </div>
   );
