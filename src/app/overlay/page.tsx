@@ -14,6 +14,7 @@ export default async function OverlayPage() {
   const businesses = await listLiveBusinesses();
 
   const items: CarouselItem[] = businesses.map((business) => ({
+    id: business.id,
     slug: business.slug,
     name: business.name,
     category: business.category,

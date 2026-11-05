@@ -304,3 +304,13 @@ export async function listLivePollsForBusiness(businessId: string): Promise<Poll
   const questions = await questionsFor(rows.map((row) => row.id));
   return rows.map((row) => toPoll(row, questions.get(row.id) ?? []));
 }
+
+export async function findCouponForEmail(pollId: string, email: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("poll_coupon_for_email", {
+    p_poll: pollId,
+    p_email: email,
+  });
+  if (error) return null;
+  return (data as string | null) ?? null;
+}

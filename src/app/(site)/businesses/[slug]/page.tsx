@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { TrackEvent, TrackedLink } from "@/components/Tracking";
 import { getBusinessBySlug } from "@/lib/data";
 import { mediaUrl } from "@/lib/media";
 import { listLivePollsForBusiness } from "@/lib/polls";
@@ -50,6 +51,7 @@ export default async function BusinessPage({
 
   return (
     <article className="mx-auto w-full max-w-5xl px-5 py-12">
+      <TrackEvent businessId={business.id} source="detail" />
       <Link href="/businesses" className="text-sm text-muted hover:text-brand">
         ← All businesses
       </Link>
@@ -127,14 +129,15 @@ export default async function BusinessPage({
               <li key={row.label}>
                 <p className="text-[11px] uppercase tracking-[0.14em] text-muted">{row.label}</p>
                 {row.href ? (
-                  <a
+                  <TrackedLink
+                    businessId={business.id}
                     href={row.href}
-                    target={row.href.startsWith("http") ? "_blank" : undefined}
-                    rel="noreferrer"
+                    source={`contact:${row.label.toLowerCase()}`}
+                    external={row.href.startsWith("http")}
                     className="text-brand hover:text-brand-ink"
                   >
                     {row.value}
-                  </a>
+                  </TrackedLink>
                 ) : (
                   <span className="text-ink">{row.value}</span>
                 )}

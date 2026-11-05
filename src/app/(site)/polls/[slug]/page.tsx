@@ -22,6 +22,7 @@ export default async function PublicPollPage({
   const coupon = query.code && query.code !== "1" ? query.code : null;
   const emailed = query.emailed === "1";
   const emailFailed = query.emailed === "0";
+  const repeated = query.emailed === "repeat";
 
   return (
     <section className="mx-auto w-full max-w-2xl px-5 py-14">
@@ -40,11 +41,13 @@ export default async function PublicPollPage({
           {coupon ? (
             <>
               <p className="mt-2 text-sm leading-relaxed text-muted">
-                {emailed
-                  ? "We've emailed your code. You can also save it from here:"
-                  : emailFailed
-                    ? "We couldn't email the code — save it from here and show it to the business."
-                    : "Email delivery is not configured yet — save this code now."}
+                {repeated
+                  ? "You've already taken this poll — here's your code again:"
+                  : emailed
+                    ? "We've emailed your code. You can also save it from here:"
+                    : emailFailed
+                      ? "We couldn't email the code — save it from here and show it to the business."
+                      : "Email delivery is not configured yet — save this code now."}
               </p>
               <p className="mt-4 rounded-xl border border-dashed border-brand/40 bg-brand-soft/50 px-5 py-4 text-center font-mono text-2xl tracking-[0.18em] text-brand">
                 {coupon}

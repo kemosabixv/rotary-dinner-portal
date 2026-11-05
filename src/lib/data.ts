@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { MEDIA_BUCKET } from "./media";
 import type {
   Business,
   BusinessInput,
@@ -206,6 +207,13 @@ export async function updateMedia(
 
 export async function deleteBusiness(id: string): Promise<void> {
   const supabase = await createClient();
+
+  // Remove the listing's media first so the bucket does not collect orphans.
+  const { data: files } = await supabase.storage.from(MEDIA_BUCKET).list(id, { limit: 100 });
+  if (files && files.length > 0) {
+    await supabase.storage.from(MEDIA_BUCKET).remove(files.map((file) => `${id}/${file.name}`));
+  }
+
   const { error } = await supabase.from("businesses").delete().eq("id", id);
   if (error) throw new Error(`Could not delete business: ${error.message}`);
 }

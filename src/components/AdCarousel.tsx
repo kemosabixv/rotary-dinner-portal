@@ -3,8 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/components/Tracking";
 
 export type CarouselItem = {
+  id: string;
   slug: string;
   name: string;
   category: string;
@@ -31,6 +33,13 @@ export function AdCarousel({
     }, intervalMs);
     return () => window.clearInterval(timer);
   }, [paused, items.length, intervalMs]);
+
+  const activeId = items[index]?.id;
+
+  useEffect(() => {
+    if (!activeId) return;
+    trackEvent({ businessId: activeId, kind: "impression", source: "carousel" });
+  }, [activeId]);
 
   if (items.length === 0) {
     return (

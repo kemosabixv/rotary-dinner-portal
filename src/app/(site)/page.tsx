@@ -10,6 +10,7 @@ export default async function HomePage() {
   const businesses = await listLiveBusinesses();
 
   const carouselItems: CarouselItem[] = businesses.map((business) => ({
+    id: business.id,
     slug: business.slug,
     name: business.name,
     category: business.category,

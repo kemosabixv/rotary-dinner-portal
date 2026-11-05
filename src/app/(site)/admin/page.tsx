@@ -3,6 +3,7 @@ import { BusinessForm } from "@/components/BusinessForm";
 import { changePassword } from "@/lib/actions/auth";
 import { createBusinessAction, setPaidAction, setStatusAction } from "@/lib/actions/businesses";
 import { listBusinesses } from "@/lib/data";
+import { listMetricTotals } from "@/lib/metrics";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,11 @@ export default async function AdminPage({
 }: {
   searchParams: Promise<{ notice?: string }>;
 }) {
-  const [{ notice }, businesses] = await Promise.all([searchParams, listBusinesses()]);
+  const [{ notice }, businesses, totals] = await Promise.all([
+    searchParams,
+    listBusinesses(),
+    listMetricTotals(),
+  ]);
 
   const liveCount = businesses.filter((business) => business.status === "live").length;
   const unpaidCount = businesses.filter((business) => business.paidStatus === "pending").length;
@@ -64,6 +69,7 @@ export default async function AdminPage({
               <th className="px-4 py-3 font-medium">Package</th>
               <th className="px-4 py-3 font-medium">Payment</th>
               <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Traffic (7d)</th>
               <th className="px-4 py-3 font-medium text-right">Actions</th>
             </tr>
           </thead>
@@ -111,6 +117,11 @@ export default async function AdminPage({
                       set
                     </button>
                   </form>
+                </td>
+                <td className="px-4 py-3 text-xs text-muted">
+                  {totals.get(business.id)?.impressions7d ?? 0} views ·{" "}
+                  {totals.get(business.id)?.clicks7d ?? 0}
+                  {(totals.get(business.id)?.clicks7d ?? 0) === 1 ? " click" : " clicks"}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <Link href={`/admin/${business.id}`} className="text-xs text-brand hover:text-brand-ink">

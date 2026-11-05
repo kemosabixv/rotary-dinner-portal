@@ -7,6 +7,7 @@ import { sendCouponEmail } from "@/lib/email";
 import {
   createPoll,
   deletePoll,
+  findCouponForEmail,
   getLivePollBySlug,
   insertResponse,
   makeCouponCode,
@@ -133,16 +134,33 @@ export async function submitPollResponseAction(formData: FormData) {
     if (value) answers[question.id] = value.slice(0, 500);
   }
 
+  if (email) {
+    const existing = await findCouponForEmail(poll.id, email);
+    if (existing) {
+      redirect(`/polls/${slug}?code=${encodeURIComponent(existing)}&thanks=1&emailed=repeat`);
+    }
+  }
+
   const couponCode = poll.couponLabel ? makeCouponCode(poll.couponPrefix) : null;
 
-  const responseId = await insertResponse({
-    pollId: poll.id,
-    answers,
-    name: String(formData.get("name") ?? "").trim().slice(0, 120) || undefined,
-    contact: String(formData.get("contact") ?? "").trim().slice(0, 120) || undefined,
-    email: email || undefined,
-    couponCode,
-  });
+  let responseId: string;
+  try {
+    responseId = await insertResponse({
+      pollId: poll.id,
+      answers,
+      name: String(formData.get("name") ?? "").trim().slice(0, 120) || undefined,
+      contact: String(formData.get("contact") ?? "").trim().slice(0, 120) || undefined,
+      email: email || undefined,
+      couponCode,
+    });
+  } catch (error) {
+    // Unique-index race: same email submitted twice at once.
+    const existing = email ? await findCouponForEmail(poll.id, email) : null;
+    if (existing) {
+      redirect(`/polls/${slug}?code=${encodeURIComponent(existing)}&thanks=1&emailed=repeat`);
+    }
+    throw error;
+  }
 
   let emailed = "skip";
   if (couponCode && email) {
