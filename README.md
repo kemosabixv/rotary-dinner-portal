@@ -47,6 +47,18 @@ otherwise the portal shows it on screen and records `coupon_email_status = skipp
 - Domain records for `rotary9215.org` are in `..\02_investigation\Resend_DNS_Records.md` — they go in
   Azure DNS, unproxied, and must not touch the apex SPF.
 
+## Live deployment
+
+- **Production:** https://rotary-dinner-portal.vercel.app
+- **Vercel project:** `rotary-dinner-portal` (team `pascals-projects-5f15a694`, region `iad1`)
+- **Source:** https://github.com/kemosabixv/rotary-dinner-portal (public)
+- **Env vars** set for all targets: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+  `RESEND_API_KEY`, `RESEND_FROM`
+- **Git auto-deploy is not linked yet.** Connect the repo in Vercel → Project → Settings → Git, or
+  trigger a deployment with the Vercel MCP (`create_deployment`, `gitSource: { type: "github",
+  repoId: 1447246100, ref: "master" }`).
+- **Custom domain:** not attached. Add it in Vercel → Domains, then create the CNAME in Azure DNS.
+
 ## Run locally
 
 ```bash
