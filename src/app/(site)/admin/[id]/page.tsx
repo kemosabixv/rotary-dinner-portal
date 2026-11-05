@@ -4,6 +4,7 @@ import { BusinessForm } from "@/components/BusinessForm";
 import { MediaManager } from "@/components/MediaManager";
 import { deleteBusinessAction, updateBusinessAction } from "@/lib/actions/businesses";
 import { getBusinessById } from "@/lib/data";
+import { getBusinessMetrics } from "@/lib/metrics";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,9 @@ export default async function EditBusinessPage({
   const business = await getBusinessById(id);
 
   if (!business) notFound();
+
+  const { totals, daily } = await getBusinessMetrics(business.id);
+  const maxDaily = Math.max(1, ...daily.map((entry) => entry.impressions + entry.clicks));
 
   return (
     <div className="space-y-8">
@@ -54,6 +58,58 @@ export default async function EditBusinessPage({
           Saved.
         </p>
       )}
+
+      <section id="analytics" className="rounded-2xl border border-line bg-surface p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-lg text-ink">Analytics</h2>
+          <p className="text-xs text-muted">
+            All time: {totals.impressions} views · {totals.clicks} clicks
+          </p>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { label: "Views (7d)", value: totals.impressions7d },
+            { label: "Clicks (7d)", value: totals.clicks7d },
+            { label: "Views (all time)", value: totals.impressions },
+            { label: "Clicks (all time)", value: totals.clicks },
+          ].map((stat) => (
+            <div key={stat.label} className="rounded-xl border border-line bg-paper/60 px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-muted">{stat.label}</p>
+              <p className="mt-1 font-display text-2xl text-ink">{stat.value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6">
+          <div className="flex h-28 items-end gap-1.5">
+            {daily.map((entry) => (
+              <div
+                key={entry.day}
+                className="flex h-full flex-1 flex-col justify-end gap-0.5"
+                title={`${entry.day}: ${entry.impressions} views, ${entry.clicks} clicks`}
+              >
+                <div
+                  className="w-full rounded-t bg-brand/70"
+                  style={{ height: `${Math.round((entry.impressions / maxDaily) * 100)}%` }}
+                />
+                <div
+                  className="w-full rounded-t bg-accent"
+                  style={{ height: `${Math.round((entry.clicks / maxDaily) * 100)}%` }}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 flex justify-between text-[10px] text-muted">
+            <span>{daily[0]?.day}</span>
+            <span>{daily[daily.length - 1]?.day}</span>
+          </div>
+          <p className="mt-3 text-xs text-muted">
+            <span className="mr-1 inline-block h-2 w-2 rounded-sm bg-brand/70" /> views ·{" "}
+            <span className="mr-1 inline-block h-2 w-2 rounded-sm bg-accent" /> clicks · last 14 days
+          </p>
+        </div>
+      </section>
 
       <section className="rounded-2xl border border-line bg-surface p-6">
         <BusinessForm action={updateBusinessAction} business={business} />

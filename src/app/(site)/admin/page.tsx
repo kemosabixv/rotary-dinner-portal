@@ -124,6 +124,12 @@ export default async function AdminPage({
                   {(totals.get(business.id)?.clicks7d ?? 0) === 1 ? " click" : " clicks"}
                 </td>
                 <td className="px-4 py-3 text-right">
+                  <Link
+                    href={`/admin/${business.id}#analytics`}
+                    className="mr-3 text-xs text-muted hover:text-brand"
+                  >
+                    Analytics
+                  </Link>
                   <Link href={`/admin/${business.id}`} className="text-xs text-brand hover:text-brand-ink">
                     Edit / media
                   </Link>

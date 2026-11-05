@@ -86,7 +86,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 | `/polls/[slug]` | Public poll/quiz — answers questions, returns a coupon code |
 | `/sign-in` | Admin sign-in |
 | `/admin` | Business list, create form, quick status/payment changes, password change |
-| `/admin/[id]` | Edit listing + media upload |
+| `/admin/[id]` | Edit listing, media upload, **analytics** (14-day views/clicks chart) |
 | `/admin/[id]/polls` | Polls for one business: create, status, open |
 | `/admin/polls/[pollId]` | Edit poll/questions, read responses, CSV export, delete |
 
