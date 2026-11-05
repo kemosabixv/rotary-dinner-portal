@@ -77,3 +77,40 @@ export type BusinessInput = {
   activeTo: string;
   pollQuiz: boolean;
 };
+
+export type PollStatus = "draft" | "live" | "closed";
+
+export type PollQuestion = {
+  id: string;
+  position: number;
+  prompt: string;
+  kind: "choice" | "text";
+  options: string[];
+  required: boolean;
+};
+
+export type Poll = {
+  id: string;
+  businessId: string;
+  slug: string;
+  title: string;
+  intro: string;
+  status: PollStatus;
+  couponLabel: string | null;
+  couponPrefix: string;
+  createdAt: string;
+  updatedAt: string;
+  questions: PollQuestion[];
+};
+
+export type PollResponse = {
+  id: string;
+  pollId: string;
+  answers: Record<string, string>;
+  respondentName: string | null;
+  respondentContact: string | null;
+  respondentEmail: string | null;
+  couponCode: string | null;
+  couponEmailStatus: string | null;
+  createdAt: string;
+};

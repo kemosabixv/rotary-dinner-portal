@@ -31,14 +31,22 @@ export default async function EditBusinessPage({
             /businesses/{business.slug} · updated {new Date(business.updatedAt).toLocaleString("en-KE")}
           </p>
         </div>
-        {business.status === "live" && (
+        <div className="flex flex-wrap items-center gap-2">
           <Link
-            href={`/businesses/${business.slug}`}
+            href={`/admin/${business.id}/polls`}
             className="rounded-full border border-line px-4 py-2 text-sm text-muted hover:border-brand hover:text-brand"
           >
-            View public page
+            Polls &amp; quizzes
           </Link>
-        )}
+          {business.status === "live" && (
+            <Link
+              href={`/businesses/${business.slug}`}
+              className="rounded-full border border-line px-4 py-2 text-sm text-muted hover:border-brand hover:text-brand"
+            >
+              View public page
+            </Link>
+          )}
+        </div>
       </div>
 
       {saved && (

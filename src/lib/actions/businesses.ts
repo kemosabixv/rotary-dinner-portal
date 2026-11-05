@@ -10,17 +10,8 @@ import {
   updateBusiness,
   updateMedia,
 } from "@/lib/data";
-import { createClient } from "@/lib/supabase/server";
 import type { BusinessInput, BusinessStatus, PaidStatus, PackageTier } from "@/lib/types";
-
-async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/sign-in");
-  return user;
-}
+import { requireUser } from "./guard";
 
 function parseBusinessForm(formData: FormData): BusinessInput {
   const services = String(formData.get("services") ?? "")

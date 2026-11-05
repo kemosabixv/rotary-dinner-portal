@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBusinessBySlug } from "@/lib/data";
 import { mediaUrl } from "@/lib/media";
+import { listLivePollsForBusiness } from "@/lib/polls";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,9 @@ export default async function BusinessPage({
   const business = await getBusinessBySlug(slug);
 
   if (!business || business.status !== "live") notFound();
+
+  const polls = await listLivePollsForBusiness(business.id);
+  const livePoll = polls[0];
 
   const logo = mediaUrl(business.logoPath);
   const photos = business.photoPaths
@@ -137,6 +141,21 @@ export default async function BusinessPage({
               </li>
             ))}
           </ul>
+
+          {livePoll && (
+            <div className="mt-6 rounded-xl border border-brand/20 bg-brand-soft/50 p-4">
+              <p className="text-sm font-medium text-ink">Quick poll</p>
+              <p className="mt-1 text-xs text-muted">
+                {livePoll.couponLabel ?? "Answer a few questions and tell them what you think."}
+              </p>
+              <Link
+                href={`/polls/${livePoll.slug}`}
+                className="mt-3 inline-flex rounded-full bg-brand px-4 py-2 text-xs font-medium text-white hover:bg-brand-ink"
+              >
+                Take the poll →
+              </Link>
+            </div>
+          )}
 
           {business.isSample && (
             <p className="mt-6 rounded-xl bg-accent-soft/50 px-3.5 py-2.5 text-xs text-brand-ink">

@@ -15,7 +15,7 @@ Scope decisions live in `..\Advertising Portal — Scope & Build Plan.md`.
 | Database | Supabase Postgres — project `rotary-dinner-portal` (`gbjihzhlmdudvjuchtzn`, eu-central-1) |
 | Media | Supabase Storage, public bucket `business-media` |
 | Auth | Supabase Auth, **email + password** sessions (no magic links), admin-only, no sign-up |
-| Email | Resend — not wired yet (only needed for confirmations/coupons) |
+| Email | Resend — coupon delivery; without `RESEND_API_KEY` the code is shown on screen |
 | Payments | Offline: M-Pesa Paybill + manual reconciliation; admin records `paidStatus` |
 
 ## Brand
@@ -34,6 +34,17 @@ D9215 + The Rotary Foundation lockup:
 | Fonts | **Archivo** (display) · **Public Sans** (body) | via `next/font` |
 
 Assets: `public/brand/rotary-d9215-trf.png` (header lockup) and `src/app/icon.png` (wheel favicon).
+
+## Email (coupon codes)
+
+Polls can issue a discount code. If `RESEND_API_KEY` is set, the code is emailed to the respondent;
+otherwise the portal shows it on screen and records `coupon_email_status = skipped`.
+
+- `RESEND_API_KEY` — sending-only key, stored in `.env.local` (gitignored) and in the Vercel project.
+- `RESEND_FROM` — defaults to `Rotary D9215 Dinner <onboarding@resend.dev>`. That sender only delivers
+  to the Resend account owner's address; real recipients need a verified domain.
+- Domain records for `rotary9215.org` are in `..\02_investigation\Resend_DNS_Records.md` — they go in
+  Azure DNS, unproxied, and must not touch the apex SPF.
 
 ## Run locally
 
@@ -59,9 +70,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 | `/businesses` | Public directory, filterable by category |
 | `/businesses/[slug]` | A single listing (only `status = 'live'` is publicly readable) |
 | `/overlay` | Transparent-background carousel for OBS / vMix browser source |
+| `/polls/[slug]` | Public poll/quiz — answers questions, returns a coupon code |
 | `/sign-in` | Admin sign-in |
 | `/admin` | Business list, create form, quick status/payment changes, password change |
 | `/admin/[id]` | Edit listing + media upload |
+| `/admin/[id]/polls` | Polls for one business: create, status, open |
+| `/admin/polls/[pollId]` | Edit poll/questions, read responses, CSV export, delete |
 
 ## Admin & media flow
 
@@ -104,10 +118,10 @@ for Pro (~$20/mo) or the district/Certitude account before the subdomain points 
 
 ## Not built yet
 
-- Poll/quiz add-on (question builder, responses, coupon issuance, export)
 - Impression/click metrics per listing
-- Resend transactional email
+- Resend transactional email (coupons are shown on-screen; emailing them is not wired)
 - Deleting a business does not delete its storage objects (delete media first)
+- Poll abuse protection is a honeypot only — no rate limiting or duplicate-response guard
 - No tests yet
 - **Streaming / stage screen (`/overlay`) is on hold** — the route exists and works as a transparent
   browser source, but nothing depends on it until the event's AV setup is confirmed with Muthoni
