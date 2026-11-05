@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 
 export default function SiteLayout({ children }: LayoutProps<"/">) {
@@ -16,11 +15,6 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
           </div>
           <div className="text-sm text-muted sm:text-right">
             <p>Business partner portal — enquiries handled by the dinner team.</p>
-            <p className="mt-2">
-              <Link href="/admin" className="text-brand hover:text-brand-ink">
-                Portal admin
-              </Link>
-            </p>
             <p className="mt-4 text-xs text-muted/80">
               Sample listings until partner submissions are loaded.
             </p>

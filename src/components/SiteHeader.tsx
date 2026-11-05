@@ -29,12 +29,6 @@ export function SiteHeader() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/admin"
-            className="ml-2 rounded-full border border-line px-3 py-2 text-xs uppercase tracking-wider text-muted transition-colors hover:border-brand hover:text-brand"
-          >
-            Admin
-          </Link>
         </nav>
       </div>
     </header>

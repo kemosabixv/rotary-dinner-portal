@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBusinessBySlug } from "@/lib/data";
@@ -47,7 +47,7 @@ export default async function BusinessPage({
   return (
     <article className="mx-auto w-full max-w-5xl px-5 py-12">
       <Link href="/businesses" className="text-sm text-muted hover:text-brand">
-        â† All businesses
+        ← All businesses
       </Link>
 
       <header className="mt-6 flex flex-wrap items-start gap-6">
@@ -140,7 +140,7 @@ export default async function BusinessPage({
 
           {business.isSample && (
             <p className="mt-6 rounded-xl bg-accent-soft/50 px-3.5 py-2.5 text-xs text-brand-ink">
-              Sample listing â€” placeholder content used while the portal is being set up.
+              Sample listing — placeholder content used while the portal is being set up.
             </p>
           )}
         </aside>
