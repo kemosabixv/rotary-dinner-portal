@@ -92,5 +92,7 @@ for Pro (~$20/mo) or the district/Certitude account before the subdomain points 
 - Resend transactional email
 - Deleting a business does not delete its storage objects (delete media first)
 - No tests yet
+- **Streaming / stage screen (`/overlay`) is on hold** — the route exists and works as a transparent
+  browser source, but nothing depends on it until the event's AV setup is confirmed with Muthoni
 - `cacheComponents` is disabled in `next.config.ts` (it conflicts with `export const dynamic`);
   revisit if we adopt PPR/Cache Components later

@@ -26,10 +26,14 @@
         "Everything in Community listing",
         "Featured placement at the top of the gallery",
         "Priority carousel weighting",
-        "Stage and broadcast overlay carousel slot at the dinner",
-        "Verbal shout-out during the program"
+        "Live through November and December"
       ],
-      "pending": ["Exact number of stage slots", "Photo count and video allowance"],
+      "pending": [
+        "Stage screen / broadcast overlay slot — depends on the event AV setup",
+        "Verbal shout-out during the program",
+        "Exact number of stage slots",
+        "Photo count and video allowance"
+      ],
       "featured": true
     }
   ],
