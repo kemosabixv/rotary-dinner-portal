@@ -1,8 +1,8 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { AdCarousel, type CarouselItem } from "@/components/AdCarousel";
 import { BusinessCard } from "@/components/BusinessCard";
 import { listLiveBusinesses } from "@/lib/data";
-import { effectiveBannerUrl, mediaUrl } from "@/lib/media";
+import { bannerSource, effectiveBannerUrl, mediaUrl } from "@/lib/media";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +17,7 @@ export default async function HomePage() {
     tagline: business.tagline,
     logoUrl: mediaUrl(business.logoPath),
     bannerUrl: effectiveBannerUrl(business),
+    bannerFallback: bannerSource(business) === "photo",
   }));
 
   return (
@@ -24,13 +25,13 @@ export default async function HomePage() {
       <section className="border-b border-line bg-gradient-to-b from-accent-soft/50 via-paper to-paper">
         <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:py-24">
           <p className="text-xs font-medium uppercase tracking-[0.22em] text-brand">
-            Rotary District 9215 · Foundation Dinner 2026
+            Rotary District 9215 Â· Foundation Dinner 2026
           </p>
           <h1 className="mt-5 max-w-3xl font-display text-4xl leading-[1.05] tracking-tight text-ink sm:text-6xl">
             Put your business in front of the district.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
-            Advertising space for small businesses in the Rotary and Rotaract network — on the
+            Advertising space for small businesses in the Rotary and Rotaract network â€” on the
             portal, on the dinner tables by QR code, and live through November and December.
             Launched at the Foundation Dinner on 21 November 2026 at the Trademark Hotel, Nairobi.
           </p>
@@ -48,7 +49,7 @@ export default async function HomePage() {
             >
               Browse the businesses
             </Link>
-            <span className="text-sm text-muted">Packages from KES 5,000 · live through December</span>
+            <span className="text-sm text-muted">Packages from KES 5,000 Â· live through December</span>
           </div>
         </div>
       </section>
@@ -62,7 +63,7 @@ export default async function HomePage() {
             </p>
           </div>
           <Link href="/businesses" className="text-sm text-brand hover:text-brand-ink">
-            All businesses →
+            All businesses â†’
           </Link>
         </div>
 
@@ -105,7 +106,7 @@ export default async function HomePage() {
         <ol className="mt-6 grid gap-6 sm:grid-cols-4">
           {[
             ["Choose a package", "Community listing at KES 5,000, or Featured partner at KES 10,000."],
-            ["Send your details", "Business description, services and contact — plus logo and photos by WhatsApp or email."],
+            ["Send your details", "Business description, services and contact â€” plus logo and photos by WhatsApp or email."],
             ["We publish", "The dinner team uploads your media and your listing goes live on the portal."],
             ["Live through December", "Your ad runs at the dinner and stays on the portal through the end of the year."],
           ].map(([title, body], index) => (
@@ -140,3 +141,5 @@ export default async function HomePage() {
     </>
   );
 }
+
+

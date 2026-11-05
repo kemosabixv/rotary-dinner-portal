@@ -13,6 +13,8 @@ export type CarouselItem = {
   tagline: string;
   logoUrl: string | null;
   bannerUrl: string | null;
+  /** True when bannerUrl is a gallery photo rather than a designed banner. */
+  bannerFallback?: boolean;
 };
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
@@ -140,9 +142,9 @@ export function AdCarousel({
         {/* Lighter scrim when the artwork speaks for itself; heavier over the gradient poster */}
         <div
           className={`absolute inset-0 ${
-            item.bannerUrl
+            item.bannerUrl && !item.bannerFallback
               ? "bg-gradient-to-b from-black/45 via-black/10 to-black/60"
-              : "bg-gradient-to-b from-black/30 via-transparent to-black/50"
+              : "bg-gradient-to-b from-black/55 via-black/45 to-black/70"
           }`}
         />
 
@@ -151,7 +153,7 @@ export function AdCarousel({
         </p>
 
         <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
-          {!item.bannerUrl && (
+          {(!item.bannerUrl || item.bannerFallback) && (
             <>
               <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-white/95 p-2 shadow-lg">
                 {item.logoUrl ? (

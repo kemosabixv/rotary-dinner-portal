@@ -1,6 +1,6 @@
-import { AdCarousel, type CarouselItem } from "@/components/AdCarousel";
+﻿import { AdCarousel, type CarouselItem } from "@/components/AdCarousel";
 import { listLiveBusinesses } from "@/lib/data";
-import { effectiveBannerUrl, mediaUrl } from "@/lib/media";
+import { bannerSource, effectiveBannerUrl, mediaUrl } from "@/lib/media";
 import { getOverlayBgMode, type OverlayBgMode } from "@/lib/settings";
 import "./overlay.css";
 
@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 /**
  * OBS / vMix browser source.
  *
- * transparent — nothing behind the ad card, for compositing over video
- * creative    — the slide itself fills the screen (banner or brand gradient),
+ * transparent â€” nothing behind the ad card, for compositing over video
+ * creative    â€” the slide itself fills the screen (banner or brand gradient),
  *               for a browser preview or a TV display
  *
  * There is deliberately no on-page switch: nothing here can appear on air.
@@ -37,6 +37,7 @@ export default async function OverlayPage({
     tagline: business.tagline,
     logoUrl: mediaUrl(business.logoPath),
     bannerUrl: effectiveBannerUrl(business),
+    bannerFallback: bannerSource(business) === "photo",
   }));
 
   if (mode === "creative") {
@@ -65,3 +66,5 @@ export default async function OverlayPage({
     </div>
   );
 }
+
+
