@@ -1,0 +1,52 @@
+{
+  "currency": "KES",
+  "note": "Draft tiers — contents marked pending are placeholders until the package one-pager is agreed. Edit this file to change prices or inclusions; no code change needed.",
+  "tiers": [
+    {
+      "id": "basic_5k",
+      "name": "Community listing",
+      "priceKes": 5000,
+      "priceLabel": "KES 5,000",
+      "summary": "For a small business that wants to be seen by the district network.",
+      "includes": [
+        "Business listing in the portal gallery (logo, description, services, contact)",
+        "Rotating banner in the portal carousel",
+        "QR code on the dinner tables linking to your listing",
+        "Live through November and December"
+      ],
+      "pending": ["Number of carousel rotations", "Media count allowed"]
+    },
+    {
+      "id": "premium_10k",
+      "name": "Featured partner",
+      "priceKes": 10000,
+      "priceLabel": "KES 10,000",
+      "summary": "For a business that wants prominence on the night and in the room.",
+      "includes": [
+        "Everything in Community listing",
+        "Featured placement at the top of the gallery",
+        "Priority carousel weighting",
+        "Stage and broadcast overlay carousel slot at the dinner",
+        "Verbal shout-out during the program"
+      ],
+      "pending": ["Exact number of stage slots", "Photo count and video allowance"],
+      "featured": true
+    }
+  ],
+  "addOn": {
+    "id": "poll_quiz",
+    "name": "Audience poll or quiz",
+    "priceKes": 10000,
+    "summary": "Ask the room 5–10 questions and get the responses back as data.",
+    "includes": [
+      "A 5–10 question poll or quiz hosted on the portal",
+      "Respondents receive a discount coupon from your business",
+      "Response summary exported to you after the dinner"
+    ],
+    "pending": [
+      "Who issues and validates the coupon",
+      "Response data-sharing and consent wording",
+      "Whether results are shown on stage"
+    ]
+  }
+}

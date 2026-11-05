@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Foundation Dinner — Advertising Portal
 
-## Getting Started
+Next.js app for the District 9215 Foundation Dinner business-partner portal: a public directory of
+advertising businesses, the advertiser landing page, an OBS/broadcast overlay, and an admin area for
+the dinner team to manage listings and media.
 
-First, run the development server:
+Scope decisions live in `..\Advertising Portal — Scope & Build Plan.md`.
+
+## Stack
+
+| Layer | What |
+|---|---|
+| Framework | Next.js 16.4 (App Router, Turbopack) · React 19 · Tailwind CSS 4 |
+| Hosting | Vercel (default URL for now, subdomain later) |
+| Database | Supabase Postgres — project `rotary-dinner-portal` (`gbjihzhlmdudvjuchtzn`, eu-central-1) |
+| Media | Supabase Storage, public bucket `business-media` |
+| Auth | Supabase Auth, **email + password** sessions (no magic links), admin-only, no sign-up |
+| Email | Resend — not wired yet (only needed for confirmations/coupons) |
+| Payments | Offline: M-Pesa Paybill + manual reconciliation; admin records `paidStatus` |
+
+## Run locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env.local   # fill from Supabase → Project Settings → API
+pnpm dev                     # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env.local` is gitignored. Only two variables are needed:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Routes
 
-## Learn More
+| Route | Purpose |
+|---|---|
+| `/` | Landing page: hero, live carousel, how it works |
+| `/advertise` | Package tiers (from `src/data/packages.json`), add-on, what we need from businesses |
+| `/businesses` | Public directory, filterable by category |
+| `/businesses/[slug]` | A single listing (only `status = 'live'` is publicly readable) |
+| `/overlay` | Transparent-background carousel for OBS / vMix browser source |
+| `/sign-in` | Admin sign-in |
+| `/admin` | Business list, create form, quick status/payment changes, password change |
+| `/admin/[id]` | Edit listing + media upload |
 
-To learn more about Next.js, take a look at the following resources:
+## Admin & media flow
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Accounts are created **manually** in Supabase (Auth → Users) or via SQL. There is no sign-up form.
+  To add an admin, create the user with a password and send it to them; they can change it at
+  `/admin` → "Change my password".
+- Businesses send their logo and photos by **WhatsApp or email**. An admin uploads them on the
+  business's edit page (`/admin/[id]` → Media). Uploads go straight from the browser to Supabase
+  Storage; paths are stored on the row (`logo_path`, `photo_paths`).
+- Limits: images only, 5MB per file, up to 6 photos per business.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Data model
 
-## Deploy on Vercel
+`public.businesses` — one row per listing. Key columns: `slug` (unique), `status`
+(`submitted`/`approved`/`live`/`expired`), `paid_status`, `package_tier`, `carousel_weight` (1–5),
+`active_from`/`active_to`, `logo_path`, `photo_paths`, `is_sample`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+RLS:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `anon` can select only `status = 'live'`.
+- `authenticated` can do everything (the admin area).
+- Storage `business-media`: public read; insert/update/delete only for `authenticated`.
+
+`is_sample` marks the six placeholder businesses seeded at setup — replace them with real submissions
+and set the flag to false (or delete them) before launch.
+
+## Deploy
+
+```bash
+npx vercel            # preview
+npx vercel --prod     # production
+```
+
+Set the two `NEXT_PUBLIC_*` variables in the Vercel project (they are baked into the client bundle at
+build time). The subdomain (`trfdinner.rotary9215.org` or agreed name) is added later in Vercel →
+Domains, then the CNAME/TXT is created in Azure DNS.
+
+Note: Vercel **Hobby is non-commercial**; selling ad space makes this a commercial deployment, so plan
+for Pro (~$20/mo) or the district/Certitude account before the subdomain points here.
+
+## Not built yet
+
+- Poll/quiz add-on (question builder, responses, coupon issuance, export)
+- Impression/click metrics per listing
+- Resend transactional email
+- Deleting a business does not delete its storage objects (delete media first)
+- No tests yet
+- `cacheComponents` is disabled in `next.config.ts` (it conflicts with `export const dynamic`);
+  revisit if we adopt PPR/Cache Components later

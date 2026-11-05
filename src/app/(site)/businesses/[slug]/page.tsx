@@ -1,0 +1,150 @@
+﻿import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getBusinessBySlug } from "@/lib/data";
+import { mediaUrl } from "@/lib/media";
+
+export const dynamic = "force-dynamic";
+
+export default async function BusinessPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const business = await getBusinessBySlug(slug);
+
+  if (!business || business.status !== "live") notFound();
+
+  const logo = mediaUrl(business.logoPath);
+  const photos = business.photoPaths
+    .map((path) => mediaUrl(path))
+    .filter((url): url is string => Boolean(url));
+
+  const contactRows = [
+    business.contact.phone && {
+      label: "Call",
+      value: business.contact.phone,
+      href: `tel:${business.contact.phone.replace(/\s+/g, "")}`,
+    },
+    business.contact.email && {
+      label: "Email",
+      value: business.contact.email,
+      href: `mailto:${business.contact.email}`,
+    },
+    business.contact.website && {
+      label: "Website",
+      value: business.contact.website.replace(/^https?:\/\//, ""),
+      href: business.contact.website,
+    },
+    business.contact.socials && {
+      label: "Social",
+      value: business.contact.socials,
+      href: undefined,
+    },
+  ].filter(Boolean) as Array<{ label: string; value: string; href?: string }>;
+
+  return (
+    <article className="mx-auto w-full max-w-5xl px-5 py-12">
+      <Link href="/businesses" className="text-sm text-muted hover:text-brand">
+        â† All businesses
+      </Link>
+
+      <header className="mt-6 flex flex-wrap items-start gap-6">
+        <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-line bg-surface">
+          {logo ? (
+            <Image
+              src={logo}
+              alt={`${business.name} logo`}
+              width={80}
+              height={80}
+              className="h-full w-full object-contain p-2"
+            />
+          ) : (
+            <span className="font-display text-3xl text-brand">{business.name.slice(0, 1)}</span>
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-xs uppercase tracking-[0.18em] text-muted">{business.category}</p>
+          <h1 className="mt-1 font-display text-3xl tracking-tight text-ink sm:text-4xl">
+            {business.name}
+          </h1>
+          <p className="mt-2 text-base text-muted">{business.tagline}</p>
+        </div>
+      </header>
+
+      <div className="mt-10 grid gap-10 lg:grid-cols-[1.6fr_1fr]">
+        <div>
+          <p className="whitespace-pre-line text-base leading-relaxed text-ink">
+            {business.description}
+          </p>
+
+          {business.services.length > 0 && (
+            <div className="mt-8">
+              <h2 className="font-display text-lg text-ink">Services</h2>
+              <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                {business.services.map((service) => (
+                  <li
+                    key={service}
+                    className="rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-ink"
+                  >
+                    {service}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {photos.length > 0 && (
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              {photos.map((photo) => (
+                <div key={photo} className="overflow-hidden rounded-2xl border border-line bg-surface">
+                  <Image
+                    src={photo}
+                    alt={`${business.name} photo`}
+                    width={800}
+                    height={600}
+                    className="h-56 w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <aside className="h-fit rounded-2xl border border-line bg-surface p-6">
+          <h2 className="font-display text-lg text-ink">Contact</h2>
+          <ul className="mt-4 space-y-3 text-sm">
+            {contactRows.length === 0 && (
+              <li className="text-muted">Contact details available at the dinner desk.</li>
+            )}
+            {contactRows.map((row) => (
+              <li key={row.label}>
+                <p className="text-[11px] uppercase tracking-[0.14em] text-muted">{row.label}</p>
+                {row.href ? (
+                  <a
+                    href={row.href}
+                    target={row.href.startsWith("http") ? "_blank" : undefined}
+                    rel="noreferrer"
+                    className="text-brand hover:text-brand-ink"
+                  >
+                    {row.value}
+                  </a>
+                ) : (
+                  <span className="text-ink">{row.value}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          {business.isSample && (
+            <p className="mt-6 rounded-xl bg-accent-soft/50 px-3.5 py-2.5 text-xs text-brand-ink">
+              Sample listing â€” placeholder content used while the portal is being set up.
+            </p>
+          )}
+        </aside>
+      </div>
+    </article>
+  );
+}

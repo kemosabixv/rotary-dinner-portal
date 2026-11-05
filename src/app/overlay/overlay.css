@@ -1,0 +1,5 @@
+/* OBS/vMix browser source: no background, so the carousel composites over video. */
+html,
+body {
+  background: transparent !important;
+}
