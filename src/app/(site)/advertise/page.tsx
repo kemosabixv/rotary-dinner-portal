@@ -18,7 +18,7 @@ export default function AdvertisePage() {
             Business partners
           </p>
           <h1 className="mt-4 max-w-3xl font-display text-4xl leading-[1.08] tracking-tight text-ink sm:text-5xl">
-            Advertise to the district network — on the portal, on the tables, on the stage.
+            Advertise to the district network — on the portal and at the dinner.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted">
             Two packages, both live through November and December. You send the words and the media;

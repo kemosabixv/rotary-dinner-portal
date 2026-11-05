@@ -21,7 +21,7 @@ export default async function SignInPage({
       </p>
 
       {error && (
-        <p className="mt-6 rounded-xl border border-brand/30 bg-brand/5 px-4 py-3 text-sm text-brand-ink">
+        <p className="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
           {error}
         </p>
       )}

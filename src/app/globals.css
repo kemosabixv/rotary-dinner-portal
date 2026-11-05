@@ -1,21 +1,23 @@
 @import "tailwindcss";
 
 /*
-  Provisional brand tokens.
-  The District 9215 brand kit has not been supplied yet — these are placeholders
-  chosen to sit next to the "Shades of Sunrise – A New Dawn" dinner theme.
-  Swapping the kit in should only mean changing the values below.
+  Brand tokens taken from the district's own Pledger app (trfpledge.rotary9215.org),
+  which uses the Rotary D9215 + TRF lockup, Rotary blue #17458f and gold #be8218,
+  with Archivo (display) and Public Sans (body).
 */
 :root {
-  --paper: #fbf7f0;
+  --paper: #f7f8fb;
   --surface: #ffffff;
-  --ink: #1b1a17;
-  --muted: #6b6558;
-  --line: #e6ddcd;
-  --brand: #7c1d2b;
-  --brand-ink: #4a0f19;
-  --accent: #c98a2e;
-  --accent-soft: #f3e3c6;
+  --ink: #0b1b3a;
+  --muted: #45577c;
+  --line: #d5dced;
+  --brand: #17458f;
+  --brand-ink: #122b52;
+  --brand-edge: #5b83c4;
+  --brand-soft: #e6ebf5;
+  --accent: #be8218;
+  --accent-edge: #e0a93f;
+  --accent-soft: #f7ecd6;
 }
 
 @theme inline {
@@ -26,11 +28,14 @@
   --color-line: var(--line);
   --color-brand: var(--brand);
   --color-brand-ink: var(--brand-ink);
+  --color-brand-edge: var(--brand-edge);
+  --color-brand-soft: var(--brand-soft);
   --color-accent: var(--accent);
+  --color-accent-edge: var(--accent-edge);
   --color-accent-soft: var(--accent-soft);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-public-sans);
+  --font-display: var(--font-archivo);
   --font-mono: var(--font-geist-mono);
-  --font-display: ui-serif, Georgia, "Times New Roman", serif;
 }
 
 body {

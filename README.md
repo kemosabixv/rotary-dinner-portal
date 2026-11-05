@@ -18,6 +18,23 @@ Scope decisions live in `..\Advertising Portal — Scope & Build Plan.md`.
 | Email | Resend — not wired yet (only needed for confirmations/coupons) |
 | Payments | Offline: M-Pesa Paybill + manual reconciliation; admin records `paidStatus` |
 
+## Brand
+
+Tokens come from the district's own Pledger app (`trfpledge.rotary9215.org`), which uses the official
+D9215 + The Rotary Foundation lockup:
+
+| Token | Value | Use |
+|---|---|---|
+| `--brand` | `#17458f` | Rotary blue — buttons, links, emphasis |
+| `--brand-ink` | `#122b52` | Hover / deep navy |
+| `--accent` | `#be8218` | Rotary gold — eyebrows, bullets, highlights |
+| `--ink` | `#0b1b3a` | Body headings |
+| `--paper` | `#f7f8fb` | Page background |
+| `--line` | `#d5dced` | Borders |
+| Fonts | **Archivo** (display) · **Public Sans** (body) | via `next/font` |
+
+Assets: `public/brand/rotary-d9215-trf.png` (header lockup) and `src/app/icon.png` (wheel favicon).
+
 ## Run locally
 
 ```bash

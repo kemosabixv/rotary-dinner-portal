@@ -29,8 +29,8 @@ export default async function HomePage() {
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
             Advertising space for small businesses in the Rotary and Rotaract network — on the
-            portal, on the tables, and on the stage at the Foundation Dinner on 21 November 2026
-            at the Trademark Hotel, Nairobi.
+            portal, on the dinner tables by QR code, and live through November and December.
+            Launched at the Foundation Dinner on 21 November 2026 at the Trademark Hotel, Nairobi.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -56,7 +56,7 @@ export default async function HomePage() {
           <div>
             <h2 className="font-display text-2xl tracking-tight text-ink">On the night and in the room</h2>
             <p className="mt-1 text-sm text-muted">
-              Partner ads rotate on the portal, on the dinner tables via QR, and on the stage carousel.
+              Partner ads rotate on the portal and are reachable from the dinner tables by QR code.
             </p>
           </div>
           <Link href="/businesses" className="text-sm text-brand hover:text-brand-ink">

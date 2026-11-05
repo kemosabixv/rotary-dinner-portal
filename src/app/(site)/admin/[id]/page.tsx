@@ -57,8 +57,8 @@ export default async function EditBusinessPage({
         photoPaths={business.photoPaths}
       />
 
-      <details className="rounded-2xl border border-brand/30 bg-surface p-5">
-        <summary className="cursor-pointer text-sm font-medium text-brand">Delete this business</summary>
+      <details className="rounded-2xl border border-rose-200 bg-surface p-5">
+        <summary className="cursor-pointer text-sm font-medium text-rose-700">Delete this business</summary>
         <p className="mt-3 text-sm text-muted">
           Removes the listing from the database. Uploaded media stays in the storage bucket — delete it
           from the Media section first if you want it gone.
