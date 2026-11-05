@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { trackEvent } from "@/components/Tracking";
 
 export type CarouselItem = {
@@ -13,6 +13,18 @@ export type CarouselItem = {
   tagline: string;
   logoUrl: string | null;
 };
+
+function Chevron({ direction }: { direction: "left" | "right" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+      <path
+        d={direction === "left" ? "M15 6l-6 6 6 6" : "M9 6l6 6-6 6"}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export function AdCarousel({
   items,
@@ -26,13 +38,32 @@ export function AdCarousel({
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
+  const go = useCallback(
+    (delta: number) => {
+      if (items.length === 0) return;
+      setIndex((current) => (current + delta + items.length) % items.length);
+    },
+    [items.length],
+  );
+
+  // Auto-advance. `index` is a dependency so a manual jump restarts the timer.
   useEffect(() => {
     if (paused || items.length < 2) return;
     const timer = window.setInterval(() => {
       setIndex((current) => (current + 1) % items.length);
     }, intervalMs);
     return () => window.clearInterval(timer);
-  }, [paused, items.length, intervalMs]);
+  }, [paused, items.length, intervalMs, index]);
+
+  // Keyboard control for the stage/overlay operator.
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "ArrowLeft") go(-1);
+      if (event.key === "ArrowRight") go(1);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [go]);
 
   const activeId = items[index]?.id;
 
@@ -52,13 +83,13 @@ export function AdCarousel({
   const item = items[index];
   const overlay = variant === "overlay";
 
+  const buttonClass = overlay
+    ? "flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
+    : "flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-brand hover:text-brand";
+
   return (
     <div
-      className={
-        overlay
-          ? "w-full"
-          : "rounded-2xl border border-line bg-surface p-6 sm:p-8"
-      }
+      className={overlay ? "w-full" : "rounded-2xl border border-line bg-surface p-6 sm:p-8"}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
@@ -106,9 +137,7 @@ export function AdCarousel({
           </p>
           <p
             className={
-              overlay
-                ? "mt-1 max-w-2xl text-base text-white/80"
-                : "mt-1 text-sm text-muted"
+              overlay ? "mt-1 max-w-2xl text-base text-white/80" : "mt-1 text-sm text-muted"
             }
           >
             {item.tagline}
@@ -117,25 +146,35 @@ export function AdCarousel({
       </div>
 
       <div className="mt-5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5">
-          {items.map((dot, dotIndex) => (
-            <button
-              key={dot.slug}
-              type="button"
-              aria-label={`Show ${dot.name}`}
-              aria-current={dotIndex === index}
-              onClick={() => setIndex(dotIndex)}
-              className={
-                dotIndex === index
-                  ? overlay
-                    ? "h-1.5 w-6 rounded-full bg-white"
-                    : "h-1.5 w-6 rounded-full bg-brand"
-                  : overlay
-                    ? "h-1.5 w-1.5 rounded-full bg-white/40"
-                    : "h-1.5 w-1.5 rounded-full bg-line"
-              }
-            />
-          ))}
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => go(-1)} aria-label="Previous business" className={buttonClass}>
+            <Chevron direction="left" />
+          </button>
+
+          <div className="flex items-center gap-1.5">
+            {items.map((dot, dotIndex) => (
+              <button
+                key={dot.slug}
+                type="button"
+                aria-label={`Show ${dot.name}`}
+                aria-current={dotIndex === index}
+                onClick={() => setIndex(dotIndex)}
+                className={
+                  dotIndex === index
+                    ? overlay
+                      ? "h-1.5 w-6 rounded-full bg-white"
+                      : "h-1.5 w-6 rounded-full bg-brand"
+                    : overlay
+                      ? "h-1.5 w-1.5 rounded-full bg-white/40"
+                      : "h-1.5 w-1.5 rounded-full bg-line"
+                }
+              />
+            ))}
+          </div>
+
+          <button type="button" onClick={() => go(1)} aria-label="Next business" className={buttonClass}>
+            <Chevron direction="right" />
+          </button>
         </div>
 
         {!overlay && (
