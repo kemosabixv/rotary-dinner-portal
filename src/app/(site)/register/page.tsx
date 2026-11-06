@@ -9,9 +9,11 @@ export const metadata = {
 export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; sent?: string }>;
+  searchParams: Promise<{ error?: string; sent?: string; next?: string }>;
 }) {
-  const { error, sent } = await searchParams;
+  const { error, sent, next } = await searchParams;
+  const safeNext = next?.startsWith("/") ? next : "";
+  const signInHref = safeNext ? `/sign-in?next=${encodeURIComponent(safeNext)}` : "/sign-in";
 
   return (
     <section className="mx-auto w-full max-w-md px-5 py-16">
@@ -24,7 +26,11 @@ export default async function RegisterPage({
 
       {sent && (
         <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          Account created. Check your email for the confirmation link, then sign in.
+          Account created. Check your email for the confirmation link, then{" "}
+          <Link href={signInHref} className="font-medium underline">
+            sign in
+          </Link>
+          .
         </div>
       )}
 
@@ -35,7 +41,7 @@ export default async function RegisterPage({
       )}
 
       <div className="mt-6">
-        <GoogleButton label="Sign up with Google" />
+        <GoogleButton label="Sign up with Google" next={safeNext || undefined} />
       </div>
 
       <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wider text-muted">
@@ -45,6 +51,7 @@ export default async function RegisterPage({
       </div>
 
       <form action={signUp} className="space-y-4">
+        {safeNext && <input type="hidden" name="next" value={safeNext} />}
         <label className="block">
           <span className="text-sm font-medium text-ink">Email</span>
           <input
@@ -91,12 +98,13 @@ export default async function RegisterPage({
 
       <p className="mt-6 text-sm text-muted">
         Already have an account?{" "}
-        <Link href="/sign-in" className="text-brand hover:text-brand-ink">
+        <Link href={signInHref} className="text-brand hover:text-brand-ink">
           Sign in
         </Link>
       </p>
       <p className="mt-2 text-xs text-muted">
-        Your listing is linked to your account by the dinner team — usually within a day of payment.
+        Paid for a package? You&apos;ll create your listing straight after checkout. Working with an
+        existing business? Request access from your portal.
       </p>
     </section>
   );

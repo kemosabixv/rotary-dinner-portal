@@ -28,27 +28,31 @@ export async function signUp(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirm") ?? "");
+  const rawNext = String(formData.get("next") ?? "");
+  const next = rawNext.startsWith("/") ? rawNext : "";
+  const back = (params: Record<string, string>) =>
+    `/register?${new URLSearchParams({ ...params, ...(next ? { next } : {}) }).toString()}`;
 
   if (password.length < 10) {
-    redirect(`/register?error=${encodeURIComponent("Use at least 10 characters for your password.")}`);
+    redirect(back({ error: "Use at least 10 characters for your password." }));
   }
   if (password !== confirm) {
-    redirect(`/register?error=${encodeURIComponent("Passwords do not match.")}`);
+    redirect(back({ error: "Passwords do not match." }));
   }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({ email, password });
 
   if (error) {
-    redirect(`/register?error=${encodeURIComponent(error.message)}`);
+    redirect(back({ error: error.message }));
   }
 
   // With email confirmation enabled there is no session yet.
   if (!data.session) {
-    redirect("/register?sent=1");
+    redirect(back({ sent: "1" }));
   }
 
-  redirect("/portal");
+  redirect(next || "/portal");
 }
 
 export async function signOut() {

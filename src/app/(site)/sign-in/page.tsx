@@ -12,6 +12,8 @@ export default async function SignInPage({
   searchParams: Promise<{ error?: string; next?: string }>;
 }) {
   const { error, next } = await searchParams;
+  const safeNext = next?.startsWith("/") ? next : "";
+  const registerHref = safeNext ? `/register?next=${encodeURIComponent(safeNext)}` : "/register";
 
   return (
     <section className="mx-auto w-full max-w-md px-5 py-16">
@@ -40,7 +42,7 @@ export default async function SignInPage({
       </div>
 
       <form action={signIn} className="space-y-4">
-        <input type="hidden" name="next" value={next ?? ""} />
+        <input type="hidden" name="next" value={safeNext} />
 
         <label className="block">
           <span className="text-sm font-medium text-ink">Email</span>
@@ -74,7 +76,7 @@ export default async function SignInPage({
 
       <p className="mt-6 text-sm text-muted">
         New business?{" "}
-        <Link href="/register" className="text-brand hover:text-brand-ink">
+        <Link href={registerHref} className="text-brand hover:text-brand-ink">
           Create an account
         </Link>
       </p>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getProfile } from "@/lib/auth";
 import { getPaymentStatus } from "@/lib/payments";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,10 @@ export default async function ThanksPage({
   searchParams: Promise<{ ref?: string }>;
 }) {
   const { ref } = await searchParams;
-  const payment = ref ? await getPaymentStatus(ref) : null;
+  const [payment, profile] = await Promise.all([
+    ref ? getPaymentStatus(ref) : Promise.resolve(null),
+    getProfile(),
+  ]);
 
   return (
     <section className="mx-auto w-full max-w-2xl px-5 py-16">
@@ -62,14 +66,40 @@ export default async function ThanksPage({
             )}
           </dl>
           <p className="mt-6 text-sm text-muted">
-            Keep this reference. The dinner team will follow up with the details for your listing.
+            Next step: add your listing details so the dinner team can review and publish it.
           </p>
-          <Link
-            href="/advertise"
-            className="mt-6 inline-flex rounded-full bg-brand px-6 py-3 text-sm font-medium text-white hover:bg-brand-ink"
-          >
-            Back to the packages
-          </Link>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {profile?.businessId ? (
+              <Link
+                href="/portal"
+                className="rounded-full bg-brand px-6 py-3 text-sm font-medium text-white hover:bg-brand-ink"
+              >
+                Go to my portal
+              </Link>
+            ) : profile ? (
+              <Link
+                href={`/portal/create?ref=${encodeURIComponent(payment.reference)}`}
+                className="rounded-full bg-brand px-6 py-3 text-sm font-medium text-white hover:bg-brand-ink"
+              >
+                Create your listing
+              </Link>
+            ) : (
+              <Link
+                href={`/sign-in?next=${encodeURIComponent(
+                  `/portal/create?ref=${payment.reference}`,
+                )}`}
+                className="rounded-full bg-brand px-6 py-3 text-sm font-medium text-white hover:bg-brand-ink"
+              >
+                Sign in to create your listing
+              </Link>
+            )}
+            <Link
+              href="/advertise"
+              className="rounded-full border border-line px-6 py-3 text-sm text-muted hover:border-brand hover:text-brand"
+            >
+              Back to the packages
+            </Link>
+          </div>
         </div>
       ) : payment.status === "failed" ? (
         <div className="rounded-3xl border border-rose-200 bg-rose-50 p-8">
