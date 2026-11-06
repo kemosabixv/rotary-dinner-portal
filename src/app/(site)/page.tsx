@@ -105,10 +105,10 @@ export default async function HomePage() {
         <h2 className="font-display text-2xl tracking-tight text-ink">How it works</h2>
         <ol className="mt-6 grid gap-6 sm:grid-cols-4">
           {[
-            ["Choose a package", "Community listing at KES 5,000, or Featured partner at KES 10,000."],
-            ["Send your details", "Business description, services and contact — plus logo and photos by WhatsApp or email."],
-            ["We publish", "The dinner team uploads your media and your listing goes live on the portal."],
-            ["Live through December", "Your ad runs at the dinner and stays on the portal through the end of the year."],
+            ["Choose a package", "Community listing at KES 5,000, or Featured partner at KES 10,000 — with an optional poll add-on."],
+            ["Create your account", "Sign in with Google or email. Checkout and your listing both live in your portal."],
+            ["Pay and build", "Pay by M-Pesa or card, then add your details, logo, photos, banner and a short video."],
+            ["Go live", "The team reviews it, your listing goes live, and views, clicks and poll results appear in your portal."],
           ].map(([title, body], index) => (
             <li key={title} className="rounded-2xl border border-line bg-surface p-5">
               <span className="text-xs font-medium uppercase tracking-[0.18em] text-accent">

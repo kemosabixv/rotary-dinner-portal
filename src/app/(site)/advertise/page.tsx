@@ -21,13 +21,14 @@ export default function AdvertisePage() {
             Advertise to the district network — on the portal and at the dinner.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted">
-            Two packages, both live through November and December. You send the words and the media;
-            the dinner team publishes everything for you.
+            Two packages, both live through November and December. Create an account, pay online, and
+            build your listing yourself — logo, photos, banner and an optional 30-second video. The
+            dinner team reviews it before it goes live.
           </p>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-5 py-14">
+      <section id="packages" className="mx-auto w-full max-w-6xl px-5 py-14">
         {hasPending && (
           <div className="mb-8 rounded-2xl border border-accent/40 bg-accent-soft/50 px-5 py-4 text-sm text-brand-ink">
             <strong className="font-medium">Draft pricing.</strong> Package contents marked “to be
@@ -129,27 +130,34 @@ export default function AdvertisePage() {
       <section className="border-y border-line bg-surface/70">
         <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 py-14 lg:grid-cols-2">
           <div>
-            <h2 className="font-display text-2xl text-ink">What we need from you</h2>
+            <h2 className="font-display text-2xl text-ink">How it works</h2>
             <ol className="mt-5 space-y-4 text-sm">
               <li>
-                <p className="font-medium text-ink">1. Your business details</p>
+                <p className="font-medium text-ink">1. Choose a package</p>
                 <p className="text-muted">
-                  Name, category, one-line description, longer description, the services you want
-                  listed, and the contact details you are happy to publish.
+                  Community listing at KES 5,000, Featured partner at KES 10,000, or add the
+                  poll/quiz for KES 10,000.
                 </p>
               </li>
               <li>
-                <p className="font-medium text-ink">2. Your logo and photos</p>
+                <p className="font-medium text-ink">2. Create your account</p>
                 <p className="text-muted">
-                  Send them by WhatsApp or email to the dinner team — a logo on a plain background,
-                  plus up to four landscape photos. We resize everything for you.
+                  Sign in with Google or email and password. Checkout, your listing and your
+                  analytics all live in the same portal.
                 </p>
               </li>
               <li>
-                <p className="font-medium text-ink">3. Confirmation of your package</p>
+                <p className="font-medium text-ink">3. Pay and add your details</p>
                 <p className="text-muted">
-                  Tell us which package you are taking and how you are paying. We publish as soon as
-                  the details and media are in.
+                  Pay by M-Pesa or card, then build the listing yourself: description, services,
+                  contact details, logo, photos, banner and an optional short video.
+                </p>
+              </li>
+              <li>
+                <p className="font-medium text-ink">4. Go live</p>
+                <p className="text-muted">
+                  The dinner team reviews it and publishes. Views, clicks, poll responses and coupons
+                  appear in your portal from then on.
                 </p>
               </li>
             </ol>
@@ -158,27 +166,26 @@ export default function AdvertisePage() {
           <div className="rounded-3xl border border-line bg-paper p-7">
             <h2 className="font-display text-2xl text-ink">Reserve a placement</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">
-              Packages are limited by carousel slots. Contact the dinner team through the district
-              channels to confirm yours — and see what a finished listing looks like before you
-              decide.
+              Packages are limited by carousel slots. Choose one and pay online — your listing goes
+              live after a quick review.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                href="/businesses"
+                href="/advertise#packages"
                 className="rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-ink"
+              >
+                See the packages
+              </Link>
+              <Link
+                href="/businesses"
+                className="rounded-full border border-line px-5 py-2.5 text-sm text-muted transition-colors hover:border-brand hover:text-brand"
               >
                 See live listings
               </Link>
-              <Link
-                href="/"
-                className="rounded-full border border-line px-5 py-2.5 text-sm text-muted transition-colors hover:border-brand hover:text-brand"
-              >
-                Back to the dinner
-              </Link>
             </div>
             <p className="mt-6 text-xs text-muted">
-              Payment is by M-Pesa Paybill to the District 9215 TRF account. The team will confirm the
-              paybill details with you directly — do not use numbers from old flyers.
+              Pay by M-Pesa or card at checkout. The district absorbs the transaction fee, so the
+              full amount goes to the Rotary Foundation.
             </p>
           </div>
         </div>
