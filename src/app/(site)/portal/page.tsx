@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOut } from "@/lib/actions/auth";
-import { getProfile, homeFor } from "@/lib/auth";
+import { markNotificationsReadAction } from "@/lib/actions/members";
+import { canWriteBusiness, getProfile, homeFor, ownsBusiness } from "@/lib/auth";
 import { getBusinessById } from "@/lib/data";
+import { listNotifications } from "@/lib/members";
 import { getBusinessMetrics } from "@/lib/metrics";
 import { listPaymentsForBusiness } from "@/lib/payments";
 import { listPollsForBusiness, listResponses } from "@/lib/polls";
@@ -26,23 +28,69 @@ export default async function PortalPage() {
   if (profile.role !== "business") redirect(homeFor(profile.role));
 
   if (!profile.businessId) {
+    const notifications = await listNotifications(8);
+
     return (
-      <section className="mx-auto w-full max-w-2xl px-5 py-16">
-        <h1 className="font-display text-3xl text-ink">Your account isn&apos;t linked yet</h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted">
-          Signed in as <span className="text-ink">{profile.email}</span>. Once your package is
-          confirmed, the dinner team links your account to your listing and this page fills up with
-          your views, clicks, polls and coupons.
-        </p>
-        <p className="mt-4 text-sm text-muted">
-          Send your payment reference to the dinner team if you haven&apos;t already.
-        </p>
-        <Link
-          href="/advertise"
-          className="mt-6 inline-flex rounded-full bg-brand px-6 py-3 text-sm font-medium text-white hover:bg-brand-ink"
-        >
-          See the packages
+      <section className="mx-auto w-full max-w-2xl space-y-6 px-5 py-16">
+        <div>
+          <h1 className="font-display text-3xl text-ink">Your account isn&apos;t linked yet</h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted">
+            Signed in as <span className="text-ink">{profile.email}</span>. Link to the business you
+            work with, or create a listing if you have already paid for a package.
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link
+            href="/portal/link"
+            className="rounded-2xl border border-line bg-surface px-5 py-4 hover:border-brand"
+          >
+            <p className="text-sm font-medium text-ink">Link to a business</p>
+            <p className="mt-1 text-xs text-muted">
+              Send a request. The owner approves it, then you get read-only access.
+            </p>
+          </Link>
+          <Link
+            href="/portal/create"
+            className="rounded-2xl border border-line bg-surface px-5 py-4 hover:border-brand"
+          >
+            <p className="text-sm font-medium text-ink">Create a listing</p>
+            <p className="mt-1 text-xs text-muted">
+              For a package you have already paid for. You become the owner.
+            </p>
+          </Link>
+        </div>
+
+        {notifications.length > 0 && (
+          <div className="rounded-2xl border border-line bg-surface p-5">
+            <h2 className="font-display text-lg text-ink">Notifications</h2>
+            <ul className="mt-3 space-y-3 text-sm">
+              {notifications.map((notification) => (
+                <li key={notification.id} className="border-b border-line pb-2 last:border-0 last:pb-0">
+                  <p className={notification.readAt ? "text-muted" : "text-ink"}>
+                    {notification.title}
+                  </p>
+                  {notification.body && (
+                    <p className="text-xs text-muted">{notification.body}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <Link href="/advertise" className="text-sm text-muted hover:text-brand">
+          Or see the packages
         </Link>
+
+        <form action={signOut}>
+          <button
+            type="submit"
+            className="rounded-full border border-line px-5 py-2.5 text-sm text-muted hover:border-brand hover:text-brand"
+          >
+            Sign out
+          </button>
+        </form>
       </section>
     );
   }
@@ -50,11 +98,17 @@ export default async function PortalPage() {
   const business = await getBusinessById(profile.businessId);
   if (!business) redirect("/portal");
 
-  const [{ totals, daily }, polls, payments] = await Promise.all([
+  const canWrite = canWriteBusiness(profile);
+  const isOwner = ownsBusiness(profile);
+
+  const [{ totals, daily }, polls, payments, notifications] = await Promise.all([
     getBusinessMetrics(business.id),
     listPollsForBusiness(business.id),
-    listPaymentsForBusiness(business.id),
+    canWrite ? listPaymentsForBusiness(business.id) : Promise.resolve([]),
+    listNotifications(5),
   ]);
+
+  const unread = notifications.filter((notification) => !notification.readAt).length;
 
   const maxDaily = Math.max(1, ...daily.map((entry) => entry.impressions + entry.clicks));
   const responsesByPoll = await Promise.all(
@@ -70,7 +124,7 @@ export default async function PortalPage() {
           <p className="mt-1 text-sm text-muted">
             {PACKAGE_LABELS[business.packageTier] ?? business.packageTier} ·{" "}
             <span className="text-ink">{business.paidStatus === "paid" ? "paid" : business.paidStatus}</span>{" "}
-            · listing {business.status}
+            · listing {business.status} · you are {profile.businessRole ?? "viewer"}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -82,12 +136,22 @@ export default async function PortalPage() {
               View my listing
             </Link>
           )}
-          <Link
-            href="/portal/listing"
-            className="rounded-full border border-line px-5 py-2.5 text-sm text-muted hover:border-brand hover:text-brand"
-          >
-            Edit listing
-          </Link>
+          {canWrite && (
+            <Link
+              href="/portal/listing"
+              className="rounded-full border border-line px-5 py-2.5 text-sm text-muted hover:border-brand hover:text-brand"
+            >
+              Edit listing
+            </Link>
+          )}
+          {isOwner && (
+            <Link
+              href="/portal/members"
+              className="rounded-full border border-line px-5 py-2.5 text-sm text-muted hover:border-brand hover:text-brand"
+            >
+              People with access
+            </Link>
+          )}
           <Link
             href="/advertise"
             className="rounded-full border border-line px-5 py-2.5 text-sm text-muted hover:border-brand hover:text-brand"
@@ -104,6 +168,46 @@ export default async function PortalPage() {
           </form>
         </div>
       </header>
+
+      {notifications.length > 0 && (
+        <section className="rounded-2xl border border-line bg-surface p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-display text-lg text-ink">
+              Notifications
+              {unread > 0 && (
+                <span className="ml-2 rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-white">
+                  {unread}
+                </span>
+              )}
+            </h2>
+            {unread > 0 && (
+              <form action={markNotificationsReadAction}>
+                <button type="submit" className="text-xs text-brand hover:text-brand-ink">
+                  Mark all as read
+                </button>
+              </form>
+            )}
+          </div>
+          <ul className="mt-4 divide-y divide-line text-sm">
+            {notifications.map((notification) => (
+              <li key={notification.id} className="py-2.5">
+                <p className={notification.readAt ? "text-muted" : "text-ink"}>
+                  {notification.href ? (
+                    <Link href={notification.href} className="hover:text-brand">
+                      {notification.title}
+                    </Link>
+                  ) : (
+                    notification.title
+                  )}
+                </p>
+                {notification.body && (
+                  <p className="mt-0.5 text-xs text-muted">{notification.body}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="rounded-2xl border border-line bg-surface p-6">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -205,38 +309,40 @@ export default async function PortalPage() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-line bg-surface p-6">
-        <h2 className="font-display text-lg text-ink">Payments</h2>
-        {payments.length === 0 ? (
-          <p className="mt-2 text-sm text-muted">
-            No payments recorded against your listing yet. If you paid by Paybill, the team will
-            reconcile it manually.
-          </p>
-        ) : (
-          <table className="mt-3 w-full text-left text-sm">
-            <thead className="text-xs uppercase tracking-wider text-muted">
-              <tr>
-                <th className="py-2 pr-4 font-medium">Date</th>
-                <th className="py-2 pr-4 font-medium">Reference</th>
-                <th className="py-2 pr-4 font-medium">Amount</th>
-                <th className="py-2 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {payments.map((payment) => (
-                <tr key={payment.id}>
-                  <td className="py-2 pr-4 text-muted">
-                    {new Date(payment.createdAt).toLocaleDateString("en-KE")}
-                  </td>
-                  <td className="py-2 pr-4 font-mono text-xs">{payment.reference}</td>
-                  <td className="py-2 pr-4">KES {payment.amountKes.toLocaleString()}</td>
-                  <td className="py-2">{payment.status}</td>
+      {canWrite && (
+        <section className="rounded-2xl border border-line bg-surface p-6">
+          <h2 className="font-display text-lg text-ink">Payments</h2>
+          {payments.length === 0 ? (
+            <p className="mt-2 text-sm text-muted">
+              No payments recorded against your listing yet. If you paid by Paybill, the team will
+              reconcile it manually.
+            </p>
+          ) : (
+            <table className="mt-3 w-full text-left text-sm">
+              <thead className="text-xs uppercase tracking-wider text-muted">
+                <tr>
+                  <th className="py-2 pr-4 font-medium">Date</th>
+                  <th className="py-2 pr-4 font-medium">Reference</th>
+                  <th className="py-2 pr-4 font-medium">Amount</th>
+                  <th className="py-2 font-medium">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {payments.map((payment) => (
+                  <tr key={payment.id}>
+                    <td className="py-2 pr-4 text-muted">
+                      {new Date(payment.createdAt).toLocaleDateString("en-KE")}
+                    </td>
+                    <td className="py-2 pr-4 font-mono text-xs">{payment.reference}</td>
+                    <td className="py-2 pr-4">KES {payment.amountKes.toLocaleString()}</td>
+                    <td className="py-2">{payment.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+      )}
     </section>
   );
 }

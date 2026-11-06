@@ -34,6 +34,15 @@ export async function updateUserAction(formData: FormData) {
     redirect(`/admin/users?error=${encodeURIComponent(error.message)}`);
   }
 
+  const { error: membershipError } = await supabase.rpc("admin_set_user_business", {
+    p_user: userId,
+    p_business: role === "business" ? businessId || null : null,
+  });
+
+  if (membershipError) {
+    redirect(`/admin/users?error=${encodeURIComponent(membershipError.message)}`);
+  }
+
   revalidatePath("/admin/users");
   redirect("/admin/users?saved=1");
 }
@@ -48,6 +57,7 @@ export async function deleteUserAction(formData: FormData) {
   }
 
   const supabase = await createClient();
+  await supabase.rpc("admin_set_user_business", { p_user: userId, p_business: null });
   const { error } = await supabase.from("profiles").delete().eq("user_id", userId);
 
   if (error) {

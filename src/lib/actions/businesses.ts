@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getProfile } from "@/lib/auth";
+import { canWriteBusiness } from "@/lib/auth";
 import {
   createBusiness,
   deleteBusiness,
@@ -81,6 +82,7 @@ export async function updateOwnBusinessAction(formData: FormData) {
   const profile = await getProfile();
   if (!profile) redirect("/sign-in?next=/portal/listing");
   if (profile.role !== "business" || !profile.businessId) redirect("/portal");
+  if (!canWriteBusiness(profile)) redirect("/portal");
 
   const input = parseBusinessForm(formData);
   if (!input.name) redirect("/portal/listing?notice=Business+name+is+required");
@@ -134,8 +136,10 @@ export async function updateMediaAction(
 ) {
   await requireUser();
   const profile = await getProfile();
-  // Businesses may only save media against their own listing.
-  if (profile?.role === "business" && profile.businessId !== id) return;
+  // Businesses may only save media against their own listing, and only if they can write.
+  if (profile?.role === "business" && (profile.businessId !== id || !canWriteBusiness(profile))) {
+    return;
+  }
 
   await updateMedia(id, media);
   revalidatePath("/", "layout");

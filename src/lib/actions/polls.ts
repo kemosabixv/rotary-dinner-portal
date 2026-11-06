@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getProfile } from "@/lib/auth";
+import { canWriteBusiness, getProfile, type Profile } from "@/lib/auth";
 import { getBusinessById } from "@/lib/data";
 import { sendCouponEmail } from "@/lib/email";
 import {
@@ -66,10 +66,18 @@ function manageHref(pollId: string, isBusiness: boolean) {
   return isBusiness ? `/portal/polls/${pollId}` : `/admin/polls/${pollId}`;
 }
 
+/** Viewers may read polls, never change them. */
+function requirePollWrite(profile: Profile | null) {
+  if (profile?.role === "business" && !canWriteBusiness(profile)) {
+    redirect("/portal/polls");
+  }
+}
+
 export async function createPollAction(formData: FormData) {
   await requireUser();
   const profile = await getProfile();
   const isBusiness = profile?.role === "business";
+  requirePollWrite(profile);
   const input = parsePollForm(formData);
 
   // A business can only create polls against its own listing.
@@ -96,6 +104,7 @@ export async function updatePollAction(formData: FormData) {
   await requireUser();
   const profile = await getProfile();
   const isBusiness = profile?.role === "business";
+  requirePollWrite(profile);
   const id = String(formData.get("id") ?? "");
   if (!id) redirect(isBusiness ? "/portal" : "/admin");
 
@@ -115,6 +124,7 @@ export async function setPollStatusAction(formData: FormData) {
   await requireUser();
   const profile = await getProfile();
   const isBusiness = profile?.role === "business";
+  requirePollWrite(profile);
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as PollStatus;
   const businessId = String(formData.get("businessId") ?? "");
@@ -138,6 +148,7 @@ export async function deletePollAction(formData: FormData) {
   await requireUser();
   const profile = await getProfile();
   const isBusiness = profile?.role === "business";
+  requirePollWrite(profile);
   const id = String(formData.get("id") ?? "");
   const businessId = String(formData.get("businessId") ?? "");
   if (!id) redirect(isBusiness ? "/portal" : "/admin");

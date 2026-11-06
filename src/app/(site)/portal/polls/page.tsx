@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { PollForm } from "@/components/PollForm";
 import { PollList } from "@/components/PollList";
 import { createPollAction } from "@/lib/actions/polls";
-import { getProfile } from "@/lib/auth";
+import { canWriteBusiness, getProfile } from "@/lib/auth";
 import { getBusinessById } from "@/lib/data";
 import { countResponses, listPollsForBusiness } from "@/lib/polls";
 
@@ -30,6 +30,7 @@ export default async function PortalPollsPage({
 
   const polls = await listPollsForBusiness(profile.businessId);
   const counts = await countResponses(polls.map((poll) => poll.id));
+  const canWrite = canWriteBusiness(profile);
 
   return (
     <section className="mx-auto w-full max-w-5xl space-y-8 px-5 py-12">
@@ -56,20 +57,23 @@ export default async function PortalPollsPage({
         basePath="/portal/polls"
         businessId={profile.businessId}
         emptyText="No polls yet. Create one below."
+        canWrite={canWrite}
       />
 
-      <details className="rounded-2xl border border-line bg-surface p-5">
-        <summary className="cursor-pointer text-sm font-medium text-brand">+ Create a poll</summary>
+      {canWrite && (
+        <details className="rounded-2xl border border-line bg-surface p-5">
+          <summary className="cursor-pointer text-sm font-medium text-brand">+ Create a poll</summary>
 
-        <div className="mt-6">
-          <PollForm
-            action={createPollAction}
-            businessId={profile.businessId}
-            defaultCouponPrefix={(business?.name ?? "DINNER").split(" ")[0].toUpperCase()}
-            submitLabel="Create poll"
-          />
-        </div>
-      </details>
+          <div className="mt-6">
+            <PollForm
+              action={createPollAction}
+              businessId={profile.businessId}
+              defaultCouponPrefix={(business?.name ?? "DINNER").split(" ")[0].toUpperCase()}
+              submitLabel="Create poll"
+            />
+          </div>
+        </details>
+      )}
     </section>
   );
 }

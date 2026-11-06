@@ -4,7 +4,7 @@ import { PollForm } from "@/components/PollForm";
 import { PollResponses } from "@/components/PollResponses";
 import { PollStatusControl } from "@/components/PollStatusControl";
 import { deletePollAction, updatePollAction } from "@/lib/actions/polls";
-import { getProfile } from "@/lib/auth";
+import { canWriteBusiness, getProfile } from "@/lib/auth";
 import { getPoll, listResponses } from "@/lib/polls";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +28,7 @@ export default async function PortalPollPage({
   if (!poll || poll.businessId !== profile.businessId) notFound();
 
   const responses = await listResponses(poll.id);
+  const canWrite = canWriteBusiness(profile);
 
   return (
     <section className="mx-auto w-full max-w-5xl space-y-8 px-5 py-12">
@@ -67,40 +68,44 @@ export default async function PortalPollPage({
         </p>
       )}
 
-      <PollStatusControl poll={poll} />
+      <PollStatusControl poll={poll} canWrite={canWrite} />
 
-      <section className="rounded-2xl border border-line bg-surface p-6">
-        <h2 className="font-display text-lg text-ink">Edit poll</h2>
-        <div className="mt-5">
-          <PollForm
-            action={updatePollAction}
-            businessId={poll.businessId}
-            poll={poll}
-            submitLabel="Save poll"
-            responseCount={responses.length}
-          />
-        </div>
-      </section>
+      {canWrite && (
+        <section className="rounded-2xl border border-line bg-surface p-6">
+          <h2 className="font-display text-lg text-ink">Edit poll</h2>
+          <div className="mt-5">
+            <PollForm
+              action={updatePollAction}
+              businessId={poll.businessId}
+              poll={poll}
+              submitLabel="Save poll"
+              responseCount={responses.length}
+            />
+          </div>
+        </section>
+      )}
 
       <PollResponses poll={poll} responses={responses} />
 
-      <details className="rounded-2xl border border-rose-200 bg-surface p-5">
-        <summary className="cursor-pointer text-sm font-medium text-rose-700">Delete this poll</summary>
-        <p className="mt-3 text-sm text-muted">
-          Deletes the poll, its questions and all {responses.length} responses. Export first if you
-          need the data.
-        </p>
-        <form action={deletePollAction} className="mt-4">
-          <input type="hidden" name="id" value={poll.id} />
-          <input type="hidden" name="businessId" value={poll.businessId} />
-          <button
-            type="submit"
-            className="rounded-full border border-rose-300 px-5 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50"
-          >
-            Delete permanently
-          </button>
-        </form>
-      </details>
+      {canWrite && (
+        <details className="rounded-2xl border border-rose-200 bg-surface p-5">
+          <summary className="cursor-pointer text-sm font-medium text-rose-700">Delete this poll</summary>
+          <p className="mt-3 text-sm text-muted">
+            Deletes the poll, its questions and all {responses.length} responses. Export first if you
+            need the data.
+          </p>
+          <form action={deletePollAction} className="mt-4">
+            <input type="hidden" name="id" value={poll.id} />
+            <input type="hidden" name="businessId" value={poll.businessId} />
+            <button
+              type="submit"
+              className="rounded-full border border-rose-300 px-5 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50"
+            >
+              Delete permanently
+            </button>
+          </form>
+        </details>
+      )}
     </section>
   );
 }

@@ -8,7 +8,20 @@ export const POLL_STATUS_STYLES: Record<string, string> = {
 };
 
 /** Draft / live / closed switch. Identical for staff and businesses. */
-export function PollStatusControl({ poll }: { poll: Poll }) {
+export function PollStatusControl({ poll, canWrite = true }: { poll: Poll; canWrite?: boolean }) {
+  if (!canWrite) {
+    return (
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-4">
+        <span className={`rounded-full border px-3 py-1 text-xs ${POLL_STATUS_STYLES[poll.status]}`}>
+          {poll.status}
+        </span>
+        <span className="text-xs text-muted">
+          Read-only access — the owner or an editor can change the status.
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-4">
       <span

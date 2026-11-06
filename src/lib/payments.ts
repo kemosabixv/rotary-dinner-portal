@@ -170,3 +170,29 @@ export async function listPaymentsForBusiness(businessId: string): Promise<Payme
   if (error) return [];
   return (data as Row[]).map(toPayment);
 }
+
+export type ClaimablePayment = {
+  reference: string;
+  package: string;
+  amountKes: number;
+  paidAt: string | null;
+};
+
+/** Paid packages, made with this account's email, not yet attached to a listing. */
+export async function listClaimablePayments(): Promise<ClaimablePayment[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("my_claimable_payments");
+  if (error) return [];
+
+  return ((data ?? []) as {
+    reference: string;
+    package: string;
+    amount_kes: number;
+    paid_at: string | null;
+  }[]).map((row) => ({
+    reference: row.reference,
+    package: row.package,
+    amountKes: Number(row.amount_kes),
+    paidAt: row.paid_at,
+  }));
+}

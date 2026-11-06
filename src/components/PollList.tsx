@@ -10,12 +10,14 @@ export function PollList({
   basePath,
   businessId,
   emptyText,
+  canWrite = true,
 }: {
   polls: Poll[];
   counts: Record<string, number>;
   basePath: string;
   businessId: string;
   emptyText: string;
+  canWrite?: boolean;
 }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-line bg-surface">
@@ -41,29 +43,37 @@ export function PollList({
               <td className="px-4 py-3 text-muted">{poll.questions.length}</td>
               <td className="px-4 py-3 text-muted">{counts[poll.id] ?? 0}</td>
               <td className="px-4 py-3">
-                <form action={setPollStatusAction} className="flex items-center gap-2">
-                  <input type="hidden" name="id" value={poll.id} />
-                  <input type="hidden" name="businessId" value={businessId} />
-                  <select
-                    name="status"
-                    defaultValue={poll.status}
+                {canWrite ? (
+                  <form action={setPollStatusAction} className="flex items-center gap-2">
+                    <input type="hidden" name="id" value={poll.id} />
+                    <input type="hidden" name="businessId" value={businessId} />
+                    <select
+                      name="status"
+                      defaultValue={poll.status}
+                      className={`rounded-full border px-2.5 py-1 text-xs ${POLL_STATUS_STYLES[poll.status]}`}
+                    >
+                      <option value="draft">draft</option>
+                      <option value="live">live</option>
+                      <option value="closed">closed</option>
+                    </select>
+                    <button type="submit" className="text-xs text-brand hover:text-brand-ink">
+                      set
+                    </button>
+                  </form>
+                ) : (
+                  <span
                     className={`rounded-full border px-2.5 py-1 text-xs ${POLL_STATUS_STYLES[poll.status]}`}
                   >
-                    <option value="draft">draft</option>
-                    <option value="live">live</option>
-                    <option value="closed">closed</option>
-                  </select>
-                  <button type="submit" className="text-xs text-brand hover:text-brand-ink">
-                    set
-                  </button>
-                </form>
+                    {poll.status}
+                  </span>
+                )}
               </td>
               <td className="px-4 py-3 text-right">
                 <Link
                   href={`${basePath}/${poll.id}`}
                   className="text-xs text-brand hover:text-brand-ink"
                 >
-                  Edit / responses
+                  {canWrite ? "Edit / responses" : "View responses"}
                 </Link>
               </td>
             </tr>

@@ -8,10 +8,14 @@ export function BusinessForm({
   action,
   business,
   variant = "staff",
+  hidden,
+  submitLabel,
 }: {
   action: (formData: FormData) => void | Promise<void>;
   business?: Business;
   variant?: "staff" | "owner";
+  hidden?: Record<string, string>;
+  submitLabel?: string;
 }) {
   const defaults: Partial<BusinessInput> = business
     ? {
@@ -46,6 +50,9 @@ export function BusinessForm({
   return (
     <form action={action} className="space-y-6">
       {business && <input type="hidden" name="id" value={business.id} />}
+      {Object.entries(hidden ?? {}).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className={labelClass}>
@@ -263,7 +270,7 @@ export function BusinessForm({
         type="submit"
         className="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-ink"
       >
-        {business ? (variant === "owner" ? "Save listing" : "Save changes") : "Create business"}
+        {submitLabel ?? (business ? (variant === "owner" ? "Save listing" : "Save changes") : "Create business")}
       </button>
     </form>
   );

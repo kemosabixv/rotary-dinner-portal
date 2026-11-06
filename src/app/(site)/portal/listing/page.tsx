@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { BusinessForm } from "@/components/BusinessForm";
 import { MediaManager } from "@/components/MediaManager";
 import { updateOwnBusinessAction } from "@/lib/actions/businesses";
-import { getProfile } from "@/lib/auth";
+import { canWriteBusiness, getProfile } from "@/lib/auth";
 import { getBusinessById } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +21,7 @@ export default async function PortalListingPage({
   if (!profile) redirect("/sign-in?next=/portal/listing");
   if (profile.role !== "business") redirect("/admin");
   if (!profile.businessId) redirect("/portal");
+  if (!canWriteBusiness(profile)) redirect("/portal");
 
   const [{ saved, notice }, business] = await Promise.all([
     searchParams,
