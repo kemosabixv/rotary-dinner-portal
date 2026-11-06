@@ -15,7 +15,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5 print:hidden">
         <div>
           <p className="text-xs uppercase tracking-[0.18em] text-muted">Portal admin</p>
           <p className="text-sm text-ink">

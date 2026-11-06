@@ -61,9 +61,14 @@ export default async function AdminPage({
             {businesses.length} listings · {liveCount} live · {unpaidCount} awaiting payment
           </p>
         </div>
-        <Link href="/businesses" className="text-sm text-brand hover:text-brand-ink">
-          Open public directory →
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/admin/cards" className="text-sm text-brand hover:text-brand-ink">
+            Table cards →
+          </Link>
+          <Link href="/businesses" className="text-sm text-brand hover:text-brand-ink">
+            Open public directory →
+          </Link>
+        </div>
       </div>
 
       {notice && (

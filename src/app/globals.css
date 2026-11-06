@@ -56,3 +56,20 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Print: table cards should be the only thing on the page */
+@media print {
+  header,
+  footer {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+}
