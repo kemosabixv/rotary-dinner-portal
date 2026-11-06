@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getProfile } from "@/lib/auth";
 import { getBusinessById } from "@/lib/data";
 import { sendCouponEmail } from "@/lib/email";
 import {
@@ -9,6 +10,7 @@ import {
   deletePoll,
   findCouponForEmail,
   getLivePollBySlug,
+  getPoll,
   insertResponse,
   makeCouponCode,
   setCouponEmailStatus,
@@ -59,55 +61,92 @@ function parsePollForm(formData: FormData): PollInput {
   };
 }
 
+/** Where a poll lives for this person: staff get the admin screen, businesses the portal. */
+function manageHref(pollId: string, isBusiness: boolean) {
+  return isBusiness ? `/portal/polls/${pollId}` : `/admin/polls/${pollId}`;
+}
+
 export async function createPollAction(formData: FormData) {
   await requireUser();
+  const profile = await getProfile();
+  const isBusiness = profile?.role === "business";
   const input = parsePollForm(formData);
 
+  // A business can only create polls against its own listing.
+  if (isBusiness) {
+    if (!profile?.businessId) redirect("/portal");
+    input.businessId = profile.businessId;
+  }
+
+  const back = isBusiness ? "/portal/polls/new" : `/admin/${input.businessId || ""}/polls`;
+
   if (!input.businessId || !input.title) {
-    redirect(`/admin/${input.businessId || ""}/polls?notice=Title+is+required`);
+    redirect(`${back}?notice=Title+is+required`);
   }
   if (input.questions.length === 0) {
-    redirect(`/admin/${input.businessId}/polls?notice=Add+at+least+one+question`);
+    redirect(`${back}?notice=Add+at+least+one+question`);
   }
 
   const poll = await createPoll(input);
   revalidatePath("/", "layout");
-  redirect(`/admin/polls/${poll.id}?saved=1`);
+  redirect(`${manageHref(poll.id, isBusiness)}?saved=1`);
 }
 
 export async function updatePollAction(formData: FormData) {
   await requireUser();
+  const profile = await getProfile();
+  const isBusiness = profile?.role === "business";
   const id = String(formData.get("id") ?? "");
+  if (!id) redirect(isBusiness ? "/portal" : "/admin");
+
+  const poll = await getPoll(id);
+  if (!poll) redirect(isBusiness ? "/portal" : "/admin");
+  if (isBusiness && poll.businessId !== profile?.businessId) redirect("/portal");
+
   const input = parsePollForm(formData);
-  if (!id) redirect("/admin");
+  input.businessId = poll.businessId;
 
   await updatePoll(id, input);
   revalidatePath("/", "layout");
-  redirect(`/admin/polls/${id}?saved=1`);
+  redirect(`${manageHref(id, isBusiness)}?saved=1`);
 }
 
 export async function setPollStatusAction(formData: FormData) {
   await requireUser();
+  const profile = await getProfile();
+  const isBusiness = profile?.role === "business";
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as PollStatus;
   const businessId = String(formData.get("businessId") ?? "");
 
-  if (!id || !["draft", "live", "closed"].includes(status)) redirect("/admin");
+  if (!id || !["draft", "live", "closed"].includes(status)) {
+    redirect(isBusiness ? "/portal" : "/admin");
+  }
+
+  const poll = await getPoll(id);
+  if (!poll) redirect(isBusiness ? "/portal" : "/admin");
+  if (isBusiness && poll.businessId !== profile?.businessId) redirect("/portal");
 
   await setPollStatus(id, status);
   revalidatePath("/", "layout");
-  redirect(businessId ? `/admin/${businessId}/polls` : "/admin");
+  redirect(isBusiness ? `/portal/polls/${id}` : businessId ? `/admin/${businessId}/polls` : "/admin");
 }
 
 export async function deletePollAction(formData: FormData) {
   await requireUser();
+  const profile = await getProfile();
+  const isBusiness = profile?.role === "business";
   const id = String(formData.get("id") ?? "");
   const businessId = String(formData.get("businessId") ?? "");
-  if (!id) redirect("/admin");
+  if (!id) redirect(isBusiness ? "/portal" : "/admin");
+
+  const poll = await getPoll(id);
+  if (!poll) redirect(isBusiness ? "/portal" : "/admin");
+  if (isBusiness && poll.businessId !== profile?.businessId) redirect("/portal");
 
   await deletePoll(id);
   revalidatePath("/", "layout");
-  redirect(businessId ? `/admin/${businessId}/polls` : "/admin");
+  redirect(isBusiness ? "/portal" : businessId ? `/admin/${businessId}/polls` : "/admin");
 }
 
 export async function submitPollResponseAction(formData: FormData) {

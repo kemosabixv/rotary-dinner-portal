@@ -147,61 +147,55 @@ export default async function PortalPage() {
       </section>
 
       <section className="rounded-2xl border border-line bg-surface p-6">
-        <h2 className="font-display text-lg text-ink">Polls &amp; coupons</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-lg text-ink">Polls &amp; coupons</h2>
+          <Link
+            href="/portal/polls/new"
+            className="rounded-full border border-line px-4 py-2 text-xs text-muted hover:border-brand hover:text-brand"
+          >
+            + New poll
+          </Link>
+        </div>
+
         {polls.length === 0 ? (
           <p className="mt-2 text-sm text-muted">
-            No polls yet. The poll/quiz add-on lets you ask the audience a few questions and hand out
-            a discount code in return.
+            No polls yet. Ask the audience a few questions and hand out a discount code in return.
           </p>
         ) : (
-          <div className="mt-4 space-y-6">
+          <ul className="mt-4 divide-y divide-line">
             {responsesByPoll.map(({ poll, responses }) => (
-              <div key={poll.id} className="rounded-xl border border-line bg-paper/40 p-4">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <p className="font-medium text-ink">{poll.title}</p>
+              <li key={poll.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <div>
+                  <Link
+                    href={`/portal/polls/${poll.id}`}
+                    className="font-medium text-ink hover:text-brand"
+                  >
+                    {poll.title}
+                  </Link>
                   <p className="text-xs text-muted">
-                    {poll.status} · {responses.length} responses
+                    {poll.status} · {responses.length}{" "}
+                    {responses.length === 1 ? "response" : "responses"}
                   </p>
                 </div>
-
-                {responses.length === 0 ? (
-                  <p className="mt-2 text-xs text-muted">No responses yet.</p>
-                ) : (
-                  <div className="mt-3 overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead className="uppercase tracking-wider text-muted">
-                        <tr>
-                          <th className="py-1.5 pr-3 font-medium">When</th>
-                          <th className="py-1.5 pr-3 font-medium">Who</th>
-                          <th className="py-1.5 pr-3 font-medium">Coupon</th>
-                          <th className="py-1.5 font-medium">Emailed</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-line">
-                        {responses.map((response) => (
-                          <tr key={response.id}>
-                            <td className="py-1.5 pr-3 text-muted">
-                              {new Date(response.createdAt).toLocaleString("en-KE")}
-                            </td>
-                            <td className="py-1.5 pr-3">
-                              {response.respondentName ?? "—"}
-                              <span className="block text-muted">
-                                {response.respondentEmail ?? response.respondentContact ?? ""}
-                              </span>
-                            </td>
-                            <td className="py-1.5 pr-3 font-mono">{response.couponCode ?? "—"}</td>
-                            <td className="py-1.5 text-muted">
-                              {response.couponEmailStatus ?? "—"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+                <div className="flex items-center gap-3">
+                  {poll.status === "live" && (
+                    <Link
+                      href={`/polls/${poll.slug}`}
+                      className="text-xs text-muted hover:text-brand"
+                    >
+                      Public page
+                    </Link>
+                  )}
+                  <Link
+                    href={`/portal/polls/${poll.id}`}
+                    className="text-xs font-medium text-brand hover:text-brand-ink"
+                  >
+                    Manage
+                  </Link>
+                </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </section>
 
