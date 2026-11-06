@@ -83,6 +83,12 @@ export default async function PortalPage() {
             </Link>
           )}
           <Link
+            href="/portal/listing"
+            className="rounded-full border border-line px-5 py-2.5 text-sm text-muted hover:border-brand hover:text-brand"
+          >
+            Edit listing
+          </Link>
+          <Link
             href="/advertise"
             className="rounded-full border border-line px-5 py-2.5 text-sm text-muted hover:border-brand hover:text-brand"
           >

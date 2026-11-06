@@ -7,9 +7,11 @@ const labelClass = "block text-sm font-medium text-ink";
 export function BusinessForm({
   action,
   business,
+  variant = "staff",
 }: {
   action: (formData: FormData) => void | Promise<void>;
   business?: Business;
+  variant?: "staff" | "owner";
 }) {
   const defaults: Partial<BusinessInput> = business
     ? {
@@ -28,6 +30,8 @@ export function BusinessForm({
         carouselWeight: business.carouselWeight,
         activeFrom: business.activeFrom,
         activeTo: business.activeTo,
+        address: business.address ?? "",
+        mapsUrl: business.mapsUrl ?? "",
         pollQuiz: business.addOns.includes("poll_quiz"),
       }
     : {
@@ -190,72 +194,76 @@ export function BusinessForm({
         </label>
       </fieldset>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <label className={labelClass}>
-          Package
-          <select name="packageTier" defaultValue={defaults.packageTier} className={fieldClass}>
-            <option value="basic_5k">Community listing (5,000)</option>
-            <option value="premium_10k">Featured partner (10,000)</option>
-            <option value="sponsor">Sponsor</option>
-            <option value="comp">Complimentary</option>
-          </select>
-        </label>
-        <label className={labelClass}>
-          Payment
-          <select name="paidStatus" defaultValue={defaults.paidStatus} className={fieldClass}>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="waived">Waived</option>
-          </select>
-        </label>
-        <label className={labelClass}>
-          Status
-          <select name="status" defaultValue={defaults.status} className={fieldClass}>
-            <option value="submitted">Submitted</option>
-            <option value="approved">Approved</option>
-            <option value="live">Live</option>
-            <option value="expired">Expired</option>
-          </select>
-        </label>
-      </div>
+      {variant === "staff" && (
+        <>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <label className={labelClass}>
+              Package
+              <select name="packageTier" defaultValue={defaults.packageTier} className={fieldClass}>
+                <option value="basic_5k">Community listing (5,000)</option>
+                <option value="premium_10k">Featured partner (10,000)</option>
+                <option value="sponsor">Sponsor</option>
+                <option value="comp">Complimentary</option>
+              </select>
+            </label>
+            <label className={labelClass}>
+              Payment
+              <select name="paidStatus" defaultValue={defaults.paidStatus} className={fieldClass}>
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+                <option value="waived">Waived</option>
+              </select>
+            </label>
+            <label className={labelClass}>
+              Status
+              <select name="status" defaultValue={defaults.status} className={fieldClass}>
+                <option value="submitted">Submitted</option>
+                <option value="approved">Approved</option>
+                <option value="live">Live</option>
+                <option value="expired">Expired</option>
+              </select>
+            </label>
+          </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <label className={labelClass}>
-          Carousel weight (1–5)
-          <input
-            name="carouselWeight"
-            type="number"
-            min={1}
-            max={5}
-            defaultValue={defaults.carouselWeight ?? 1}
-            className={fieldClass}
-          />
-        </label>
-        <label className={labelClass}>
-          Active from
-          <input name="activeFrom" type="date" defaultValue={defaults.activeFrom} className={fieldClass} />
-        </label>
-        <label className={labelClass}>
-          Active to
-          <input name="activeTo" type="date" defaultValue={defaults.activeTo} className={fieldClass} />
-        </label>
-      </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <label className={labelClass}>
+              Carousel weight (1–5)
+              <input
+                name="carouselWeight"
+                type="number"
+                min={1}
+                max={5}
+                defaultValue={defaults.carouselWeight ?? 1}
+                className={fieldClass}
+              />
+            </label>
+            <label className={labelClass}>
+              Active from
+              <input name="activeFrom" type="date" defaultValue={defaults.activeFrom} className={fieldClass} />
+            </label>
+            <label className={labelClass}>
+              Active to
+              <input name="activeTo" type="date" defaultValue={defaults.activeTo} className={fieldClass} />
+            </label>
+          </div>
 
-      <label className="flex items-center gap-2.5 text-sm text-ink">
-        <input
-          type="checkbox"
-          name="pollQuiz"
-          defaultChecked={defaults.pollQuiz}
-          className="h-4 w-4 rounded border-line"
-        />
-        Includes the poll/quiz add-on
-      </label>
+          <label className="flex items-center gap-2.5 text-sm text-ink">
+            <input
+              type="checkbox"
+              name="pollQuiz"
+              defaultChecked={defaults.pollQuiz}
+              className="h-4 w-4 rounded border-line"
+            />
+            Includes the poll/quiz add-on
+          </label>
+        </>
+      )}
 
       <button
         type="submit"
         className="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-ink"
       >
-        {business ? "Save changes" : "Create business"}
+        {business ? (variant === "owner" ? "Save listing" : "Save changes") : "Create business"}
       </button>
     </form>
   );

@@ -212,6 +212,39 @@ export async function updateBusiness(id: string, input: BusinessInput): Promise<
   if (error) throw new Error(`Could not save business: ${error.message}`);
 }
 
+/**
+ * What a business may change about its own listing. Commercial fields
+ * (package, payment, status, weighting, dates) stay with staff, and a database
+ * trigger enforces that even if someone calls the API directly.
+ */
+export async function updateOwnListing(id: string, input: BusinessInput): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("businesses")
+    .update({
+      name: input.name,
+      category: input.category,
+      tagline: input.tagline,
+      description: input.description,
+      services: input.services,
+      address: input.address || null,
+      maps_url: input.mapsUrl || null,
+      phone: input.phone || null,
+      email: input.email || null,
+      website: input.website || null,
+      instagram: input.socials?.instagram || null,
+      facebook: input.socials?.facebook || null,
+      x_url: input.socials?.x || null,
+      linkedin: input.socials?.linkedin || null,
+      tiktok: input.socials?.tiktok || null,
+      youtube: input.socials?.youtube || null,
+      whatsapp: input.socials?.whatsapp || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) throw new Error(`Could not save listing: ${error.message}`);
+}
+
 export async function setStatus(id: string, status: BusinessStatus): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase.from("businesses").update({ status }).eq("id", id);
