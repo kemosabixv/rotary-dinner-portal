@@ -34,6 +34,16 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // A deleted account or expired refresh token leaves a dead cookie behind.
+  // Clear it here so every request stops retrying and logging the failure.
+  if (!user) {
+    for (const cookie of request.cookies.getAll()) {
+      if (cookie.name.startsWith("sb-") && cookie.name.includes("-auth-token")) {
+        response.cookies.delete(cookie.name);
+      }
+    }
+  }
+
   const { pathname } = request.nextUrl;
 
   if (!user && pathname.startsWith("/admin")) {
