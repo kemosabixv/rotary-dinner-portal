@@ -165,6 +165,15 @@ for Pro (~$20/mo) or the district/Certitude account before the subdomain points 
 - Public data reads use `lib/supabase/public.ts` (no cookies). Anything that needs the signed-in user
   must keep using `lib/supabase/server.ts`, which makes that route dynamic by design.
 
+## Documents
+
+Both PDFs are generated from their markdown source with headless Chrome:
+
+```bash
+node scripts/features-pdf.mjs   # ../FEATURES.md  -> ../FEATURES.pdf
+node scripts/raffle-pdf.mjs     # ../03_raffle/TRF_Dinner_Raffle_Plan.md -> .pdf
+```
+
 ## Copy rules (public UI)
 
 Never put internal operations or commercials in customer-facing copy. Do not mention:
