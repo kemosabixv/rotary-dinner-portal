@@ -153,6 +153,18 @@ Domains, then the CNAME/TXT is created in Azure DNS.
 Note: Vercel **Hobby is non-commercial**; selling ad space makes this a commercial deployment, so plan
 for Pro (~$20/mo) or the district/Certitude account before the subdomain points here.
 
+## Performance
+
+- Functions run in **`fra1` (Frankfurt)**, the same region as Supabase (`eu-central-1`). Do not move
+  the project region without moving the database — cross-Atlantic queries were the original 6–8 s.
+- Public pages (`/`, `/businesses`, `/businesses/[slug]`, `/advertise`) are **static/ISR** with
+  `revalidate = 60` and are served from the edge (`X-Vercel-Cache: HIT`). New or edited listings
+  appear within a minute.
+- The site header reads the Supabase session **in the browser**, so public pages never call
+  `cookies()` and never render per visitor.
+- Public data reads use `lib/supabase/public.ts` (no cookies). Anything that needs the signed-in user
+  must keep using `lib/supabase/server.ts`, which makes that route dynamic by design.
+
 ## Not built yet
 
 - No automated tests yet (everything has been verified manually in a browser)
