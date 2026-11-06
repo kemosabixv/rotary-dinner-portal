@@ -129,7 +129,9 @@ export async function setPollStatusAction(formData: FormData) {
 
   await setPollStatus(id, status);
   revalidatePath("/", "layout");
-  redirect(isBusiness ? `/portal/polls/${id}` : businessId ? `/admin/${businessId}/polls` : "/admin");
+  redirect(
+    isBusiness ? "/portal/polls" : businessId ? `/admin/${businessId}/polls` : "/admin",
+  );
 }
 
 export async function deletePollAction(formData: FormData) {

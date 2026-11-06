@@ -150,10 +150,10 @@ export default async function PortalPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-lg text-ink">Polls &amp; coupons</h2>
           <Link
-            href="/portal/polls/new"
+            href="/portal/polls"
             className="rounded-full border border-line px-4 py-2 text-xs text-muted hover:border-brand hover:text-brand"
           >
-            + New poll
+            Manage polls
           </Link>
         </div>
 

@@ -250,6 +250,25 @@ export async function listResponses(pollId: string): Promise<PollResponse[]> {
   }));
 }
 
+/** Response totals per poll, for the poll lists. */
+export async function countResponses(pollIds: string[]): Promise<Record<string, number>> {
+  if (pollIds.length === 0) return {};
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("poll_responses")
+    .select("poll_id")
+    .in("poll_id", pollIds);
+
+  if (error) throw new Error(`Could not count responses: ${error.message}`);
+
+  const counts: Record<string, number> = {};
+  for (const row of data as { poll_id: string }[]) {
+    counts[row.poll_id] = (counts[row.poll_id] ?? 0) + 1;
+  }
+  return counts;
+}
+
 export function makeCouponCode(prefix: string): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
