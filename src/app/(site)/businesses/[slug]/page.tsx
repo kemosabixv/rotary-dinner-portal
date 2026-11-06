@@ -3,11 +3,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SocialLinks } from "@/components/SocialLinks";
 import { TrackEvent, TrackedLink } from "@/components/Tracking";
-import { getBusinessBySlug } from "@/lib/data";
+import { getLiveBusinessBySlugPublic, listLiveBusinessesPublic } from "@/lib/data";
 import { effectiveBannerUrl, mediaUrl } from "@/lib/media";
-import { listLivePollsForBusiness } from "@/lib/polls";
+import { listLivePollsForBusinessPublic } from "@/lib/polls";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const businesses = await listLiveBusinessesPublic();
+  return businesses.map((business) => ({ slug: business.slug }));
+}
 
 export default async function BusinessPage({
   params,
@@ -15,11 +20,11 @@ export default async function BusinessPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const business = await getBusinessBySlug(slug);
+  const business = await getLiveBusinessBySlugPublic(slug);
 
-  if (!business || business.status !== "live") notFound();
+  if (!business) notFound();
 
-  const polls = await listLivePollsForBusiness(business.id);
+  const polls = await listLivePollsForBusinessPublic(business.id);
   const livePoll = polls[0];
 
   const logo = mediaUrl(business.logoPath);

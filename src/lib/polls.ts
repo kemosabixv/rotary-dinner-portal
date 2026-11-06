@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { Poll, PollQuestion, PollResponse, PollStatus } from "./types";
 
 type PollRow = {
@@ -322,6 +323,39 @@ export async function listLivePollsForBusiness(businessId: string): Promise<Poll
   const rows = data as PollRow[];
   const questions = await questionsFor(rows.map((row) => row.id));
   return rows.map((row) => toPoll(row, questions.get(row.id) ?? []));
+}
+
+/** Public listing page: cookie-free so the page can be cached. */
+export async function listLivePollsForBusinessPublic(businessId: string): Promise<Poll[]> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("polls")
+    .select(POLL_COLUMNS)
+    .eq("business_id", businessId)
+    .eq("status", "live")
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(`Could not load polls: ${error.message}`);
+
+  const rows = data as PollRow[];
+  if (rows.length === 0) return [];
+
+  const { data: questionRows, error: questionError } = await supabase
+    .from("poll_questions")
+    .select(QUESTION_COLUMNS)
+    .in("poll_id", rows.map((row) => row.id))
+    .order("position", { ascending: true });
+
+  if (questionError) throw new Error(`Could not load questions: ${questionError.message}`);
+
+  const map = new Map<string, PollQuestion[]>();
+  for (const row of (questionRows ?? []) as QuestionRow[]) {
+    const list = map.get(row.poll_id) ?? [];
+    list.push(toQuestion(row));
+    map.set(row.poll_id, list);
+  }
+
+  return rows.map((row) => toPoll(row, map.get(row.id) ?? []));
 }
 
 export async function findCouponForEmail(pollId: string, email: string): Promise<string | null> {

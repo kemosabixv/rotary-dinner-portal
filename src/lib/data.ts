@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { MEDIA_BUCKET } from "./media";
 import type {
   Business,
@@ -129,6 +130,33 @@ export async function getBusinessBySlug(slug: string): Promise<Business | null> 
     .from("businesses")
     .select(COLUMNS)
     .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) throw new Error(`Could not load business: ${error.message}`);
+  return data ? toBusiness(data as BusinessRow) : null;
+}
+
+/** Public pages: no cookies, so they can be cached at the edge. */
+export async function listLiveBusinessesPublic(): Promise<Business[]> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("businesses")
+    .select(COLUMNS)
+    .eq("status", "live")
+    .order("carousel_weight", { ascending: false })
+    .order("name", { ascending: true });
+
+  if (error) throw new Error(`Could not load live businesses: ${error.message}`);
+  return (data as BusinessRow[]).map(toBusiness);
+}
+
+export async function getLiveBusinessBySlugPublic(slug: string): Promise<Business | null> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("businesses")
+    .select(COLUMNS)
+    .eq("slug", slug)
+    .eq("status", "live")
     .maybeSingle();
 
   if (error) throw new Error(`Could not load business: ${error.message}`);

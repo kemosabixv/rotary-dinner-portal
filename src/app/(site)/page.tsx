@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { AdCarousel, type CarouselItem } from "@/components/AdCarousel";
 import { BusinessCard } from "@/components/BusinessCard";
-import { listLiveBusinesses } from "@/lib/data";
+import { listLiveBusinessesPublic } from "@/lib/data";
 import { bannerSource, effectiveBannerUrl, mediaUrl } from "@/lib/media";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function HomePage() {
-  const businesses = await listLiveBusinesses();
+  const businesses = await listLiveBusinessesPublic();
 
   const carouselItems: CarouselItem[] = businesses.map((business) => ({
     id: business.id,

@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { getProfile } from "@/lib/auth";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const links = [
   { href: "/", label: "Home" },
@@ -8,15 +11,34 @@ const links = [
   { href: "/businesses", label: "Businesses" },
 ];
 
-export async function SiteHeader() {
-  const profile = await getProfile();
+/**
+ * Client-side auth state: reading the session in the browser keeps the public
+ * pages free of `cookies()`, so they can be cached at the edge.
+ */
+export function SiteHeader() {
+  const [signedIn, setSignedIn] = useState(false);
 
-  const account =
-    !profile
-      ? { href: "/sign-in", label: "Sign in", primary: true }
-      : profile.role === "business"
-        ? { href: "/portal", label: "My portal", primary: false }
-        : { href: "/admin", label: "Admin", primary: false };
+  useEffect(() => {
+    const supabase = createClient();
+    let active = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (active) setSignedIn(Boolean(data.session));
+    });
+
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(Boolean(session));
+    });
+
+    return () => {
+      active = false;
+      subscription.subscription.unsubscribe();
+    };
+  }, []);
+
+  const account = signedIn
+    ? { href: "/portal", label: "My portal", primary: false }
+    : { href: "/sign-in", label: "Sign in", primary: true };
 
   return (
     <header className="sticky top-0 z-40 border-b border-line/80 bg-surface/95 backdrop-blur print:hidden">
