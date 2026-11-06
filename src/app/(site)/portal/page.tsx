@@ -314,8 +314,7 @@ export default async function PortalPage() {
           <h2 className="font-display text-lg text-ink">Payments</h2>
           {payments.length === 0 ? (
             <p className="mt-2 text-sm text-muted">
-              No payments recorded against your listing yet. If you paid by Paybill, the team will
-              reconcile it manually.
+              No payments recorded against this listing yet.
             </p>
           ) : (
             <table className="mt-3 w-full text-left text-sm">

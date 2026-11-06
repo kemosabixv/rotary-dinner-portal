@@ -184,8 +184,7 @@ export default function AdvertisePage() {
               </Link>
             </div>
             <p className="mt-6 text-xs text-muted">
-              Pay by M-Pesa or card at checkout. The district absorbs the transaction fee, so the
-              full amount goes to the Rotary Foundation.
+              Pay securely by M-Pesa or card at checkout. You&apos;ll get a receipt by email.
             </p>
           </div>
         </div>

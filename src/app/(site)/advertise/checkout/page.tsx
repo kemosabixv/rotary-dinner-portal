@@ -51,8 +51,7 @@ export default async function CheckoutPage({
 
       <h1 className="mt-3 font-display text-3xl tracking-tight text-ink">Buy a package</h1>
       <p className="mt-2 text-base leading-relaxed text-muted">
-        Payment is handled by Paystack (M-Pesa or card). The district absorbs the transaction fee —
-        you pay exactly the package price.
+        Pay securely by M-Pesa or card. You&apos;ll get a receipt by email.
       </p>
 
       {error && (
@@ -129,8 +128,7 @@ export default async function CheckoutPage({
         </div>
 
         <p className="text-xs text-muted">
-          Prefer to pay by Paybill? That still works — ask the dinner team for the details and the
-          team will mark your package as paid manually.
+          Need help with payment? Contact the dinner team.
         </p>
       </form>
 

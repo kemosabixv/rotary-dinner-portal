@@ -165,6 +165,18 @@ for Pro (~$20/mo) or the district/Certitude account before the subdomain points 
 - Public data reads use `lib/supabase/public.ts` (no cookies). Anything that needs the signed-in user
   must keep using `lib/supabase/server.ts`, which makes that route dynamic by design.
 
+## Copy rules (public UI)
+
+Never put internal operations or commercials in customer-facing copy. Do not mention:
+
+- payment or infrastructure vendors (Paystack, Supabase, Resend, Vercel)
+- fees, commissions, settlement, who absorbs costs, margins
+- manual reconciliation, staff workflow, review queues, database/storage details
+- staff names or internal ticket/account references
+
+Say what the customer does and gets — "Pay by M-Pesa or card", "You'll get a receipt by email" — not
+how the district runs it. Operational detail belongs in `/admin`, `ADMIN_USERS.md` or the scope doc.
+
 ## Not built yet
 
 - No automated tests yet (everything has been verified manually in a browser)
