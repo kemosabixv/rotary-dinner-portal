@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -17,23 +18,28 @@ const links = [
  */
 export function SiteHeader() {
   const [signedIn, setSignedIn] = useState(false);
+  const pathname = usePathname();
+
+  // Re-read on navigation: signing in happens in a server action, which does
+  // not emit a client auth event.
+  useEffect(() => {
+    let active = true;
+    createClient()
+      .auth.getSession()
+      .then(({ data }) => {
+        if (active) setSignedIn(Boolean(data.session));
+      });
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
 
   useEffect(() => {
-    const supabase = createClient();
-    let active = true;
-
-    supabase.auth.getSession().then(({ data }) => {
-      if (active) setSignedIn(Boolean(data.session));
-    });
-
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: subscription } = createClient().auth.onAuthStateChange((_event, session) => {
       setSignedIn(Boolean(session));
     });
 
-    return () => {
-      active = false;
-      subscription.subscription.unsubscribe();
-    };
+    return () => subscription.subscription.unsubscribe();
   }, []);
 
   const account = signedIn
