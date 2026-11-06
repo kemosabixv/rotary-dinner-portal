@@ -67,6 +67,7 @@ export type NewPayment = {
   buyerEmail?: string;
   buyerPhone?: string;
   businessName?: string;
+  businessId?: string | null;
 };
 
 export async function createPayment(input: NewPayment): Promise<{ verifyToken: string }> {
@@ -81,6 +82,7 @@ export async function createPayment(input: NewPayment): Promise<{ verifyToken: s
     buyer_email: input.buyerEmail || null,
     buyer_phone: input.buyerPhone || null,
     business_name: input.businessName || null,
+    business_id: input.businessId || null,
     status: "pending",
     verify_token: verifyToken,
   });
@@ -154,5 +156,17 @@ export async function listPayments(limit = 25): Promise<Payment[]> {
     .limit(limit);
 
   if (error) throw new Error(`Could not load payments: ${error.message}`);
+  return (data as Row[]).map(toPayment);
+}
+
+export async function listPaymentsForBusiness(businessId: string): Promise<Payment[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("payments")
+    .select(COLUMNS)
+    .eq("business_id", businessId)
+    .order("created_at", { ascending: false });
+
+  if (error) return [];
   return (data as Row[]).map(toPayment);
 }

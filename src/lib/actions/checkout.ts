@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import packagesJson from "@/data/packages.json";
+import { getProfile } from "@/lib/auth";
 import { createPayment } from "@/lib/payments";
 import { initializeTransaction } from "@/lib/paystack";
 import type { PackagesConfig } from "@/lib/types";
@@ -44,6 +45,8 @@ export async function startCheckoutAction(formData: FormData) {
     .toString(36)
     .toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
+  const profile = await getProfile();
+
   const { verifyToken } = await createPayment({
     reference,
     package: packageId,
@@ -52,6 +55,7 @@ export async function startCheckoutAction(formData: FormData) {
     buyerEmail: email,
     buyerPhone: phone,
     businessName,
+    businessId: profile?.businessId ?? null,
   });
 
   let authorizationUrl = "";

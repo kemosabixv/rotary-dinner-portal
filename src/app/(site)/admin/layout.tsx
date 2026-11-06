@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOut } from "@/lib/actions/auth";
+import { getProfile, homeFor } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,11 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/sign-in");
+
+  const profile = await getProfile();
+  if (!profile || (profile.role !== "admin" && profile.role !== "superadmin")) {
+    redirect(homeFor(profile?.role ?? "business"));
+  }
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">

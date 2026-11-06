@@ -3,6 +3,7 @@ import { BusinessForm } from "@/components/BusinessForm";
 import { changePassword } from "@/lib/actions/auth";
 import { createBusinessAction, setPaidAction, setStatusAction } from "@/lib/actions/businesses";
 import { setOverlayBgModeAction } from "@/lib/actions/settings";
+import { getProfile } from "@/lib/auth";
 import { listBusinesses } from "@/lib/data";
 import { listMetricTotals } from "@/lib/metrics";
 import { listPayments } from "@/lib/payments";
@@ -41,12 +42,13 @@ export default async function AdminPage({
 }: {
   searchParams: Promise<{ notice?: string }>;
 }) {
-  const [{ notice }, businesses, totals, overlayMode, payments] = await Promise.all([
+  const [{ notice }, businesses, totals, overlayMode, payments, me] = await Promise.all([
     searchParams,
     listBusinesses(),
     listMetricTotals(),
     getOverlayBgMode(),
     listPayments(15),
+    getProfile(),
   ]);
 
   const liveCount = businesses.filter((business) => business.status === "live").length;
@@ -62,6 +64,11 @@ export default async function AdminPage({
           </p>
         </div>
         <div className="flex items-center gap-4">
+          {me?.role === "superadmin" && (
+            <Link href="/admin/users" className="text-sm text-brand hover:text-brand-ink">
+              Users →
+            </Link>
+          )}
           <Link href="/admin/cards" className="text-sm text-brand hover:text-brand-ink">
             Table cards →
           </Link>
