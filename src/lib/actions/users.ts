@@ -57,3 +57,27 @@ export async function deleteUserAction(formData: FormData) {
   revalidatePath("/admin/users");
   redirect("/admin/users?saved=1");
 }
+
+export async function createUserAction(formData: FormData) {
+  await requireSuperadmin();
+
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const role = String(formData.get("role") ?? "business");
+  const businessId = String(formData.get("businessId") ?? "");
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_create_user", {
+    p_email: email,
+    p_password: password,
+    p_role: role,
+    p_business_id: businessId || null,
+  });
+
+  if (error) {
+    redirect(`/admin/users?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/admin/users");
+  redirect("/admin/users?created=1");
+}

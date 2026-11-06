@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { deleteUserAction, updateUserAction } from "@/lib/actions/users";
+import { createUserAction, deleteUserAction, updateUserAction } from "@/lib/actions/users";
 import { getProfile } from "@/lib/auth";
 import { listBusinesses } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
@@ -16,9 +16,9 @@ const ROLE_STYLES: Record<string, string> = {
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string; error?: string }>;
+  searchParams: Promise<{ saved?: string; error?: string; created?: string }>;
 }) {
-  const [{ saved, error }, me] = await Promise.all([searchParams, getProfile()]);
+  const [{ saved, error, created }, me] = await Promise.all([searchParams, getProfile()]);
 
   if (!me || me.role !== "superadmin") redirect("/admin");
 
@@ -65,11 +65,81 @@ export default async function AdminUsersPage({
           Saved.
         </p>
       )}
+      {created && (
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          User created. Share the temporary password with them — they can change it after signing in.
+        </p>
+      )}
       {error && (
         <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
           {error}
         </p>
       )}
+
+      <details className="rounded-2xl border border-line bg-surface p-5" open={false}>
+        <summary className="cursor-pointer text-sm font-medium text-brand">+ Create a user</summary>
+
+        <form action={createUserAction} className="mt-5 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block text-sm font-medium text-ink">
+              Email
+              <input
+                type="email"
+                name="email"
+                required
+                className="mt-1.5 w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-brand"
+              />
+            </label>
+            <label className="block text-sm font-medium text-ink">
+              Temporary password
+              <input
+                type="text"
+                name="password"
+                required
+                minLength={10}
+                className="mt-1.5 w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-brand"
+              />
+              <span className="mt-1 block text-xs text-muted">
+                At least 10 characters. Share it with them, they can change it after signing in.
+              </span>
+            </label>
+            <label className="block text-sm font-medium text-ink">
+              Role
+              <select
+                name="role"
+                defaultValue="admin"
+                className="mt-1.5 w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-brand"
+              >
+                <option value="admin">admin — staff, manages everything</option>
+                <option value="superadmin">superadmin — can also manage users</option>
+                <option value="business">business — sees one listing only</option>
+              </select>
+            </label>
+            <label className="block text-sm font-medium text-ink">
+              Linked listing (business accounts)
+              <select
+                name="businessId"
+                defaultValue=""
+                className="mt-1.5 w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-brand"
+              >
+                <option value="">— none —</option>
+                {businesses.map((business) => (
+                  <option key={business.id} value={business.id}>
+                    {business.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            className="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-ink"
+          >
+            Create user
+          </button>
+        </form>
+      </details>
 
       <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         <table className="w-full text-left text-sm">

@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { startCheckoutAction } from "@/lib/actions/checkout";
 import packagesJson from "@/data/packages.json";
+import { getProfile } from "@/lib/auth";
 import type { PackagesConfig } from "@/lib/types";
 
 const packages = packagesJson as PackagesConfig;
@@ -32,6 +34,14 @@ export default async function CheckoutPage({
   const { package: packageId, error } = await searchParams;
   const selected = packageId && priceFor(packageId) ? packageId : packages.tiers[0].id;
   const amountKes = priceFor(selected) ?? 0;
+
+  // Purchases require an account: the listing, analytics and coupons hang off it.
+  const profile = await getProfile();
+  if (!profile) {
+    redirect(
+      `/sign-in?next=${encodeURIComponent(`/advertise/checkout?package=${selected}`)}`,
+    );
+  }
 
   return (
     <section className="mx-auto w-full max-w-2xl px-5 py-14">

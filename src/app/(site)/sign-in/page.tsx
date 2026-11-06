@@ -20,7 +20,7 @@ export default async function SignInPage({
         Welcome back
       </h1>
       <p className="mt-2 text-sm text-muted">
-        Business owners see their listing, analytics, polls and coupons. Staff manage the portal.
+        Business owners see their listing, analytics, polls and coupons.
       </p>
 
       {error && (

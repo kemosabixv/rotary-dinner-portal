@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getProfile } from "@/lib/auth";
 
 const links = [
   { href: "/", label: "Home" },
@@ -7,9 +8,18 @@ const links = [
   { href: "/businesses", label: "Businesses" },
 ];
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const profile = await getProfile();
+
+  const account =
+    !profile
+      ? { href: "/sign-in", label: "Sign in", primary: true }
+      : profile.role === "business"
+        ? { href: "/portal", label: "My portal", primary: false }
+        : { href: "/admin", label: "Admin", primary: false };
+
   return (
-    <header className="sticky top-0 z-40 border-b border-line/80 bg-surface/95 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-line/80 bg-surface/95 backdrop-blur print:hidden">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-5">
         <Link href="/" className="flex shrink-0 items-center gap-3">
           <Image
@@ -38,6 +48,17 @@ export function SiteHeader() {
               {link.label}
             </Link>
           ))}
+
+          <Link
+            href={account.href}
+            className={
+              account.primary
+                ? "ml-1 rounded-full bg-brand px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-brand-ink sm:text-sm"
+                : "ml-1 rounded-full border border-line px-4 py-2 text-xs font-medium text-muted transition-colors hover:border-brand hover:text-brand sm:text-sm"
+            }
+          >
+            {account.label}
+          </Link>
         </nav>
       </div>
     </header>
