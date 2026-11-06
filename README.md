@@ -147,7 +147,7 @@ npx vercel --prod     # production
 ```
 
 Set the two `NEXT_PUBLIC_*` variables in the Vercel project (they are baked into the client bundle at
-build time). The subdomain (`trfdinner.rotary9215.org` or agreed name) is added later in Vercel →
+build time). The subdomain (**proposed: `ads.rotary9215.org`**) is added later in Vercel →
 Domains, then the CNAME/TXT is created in Azure DNS.
 
 Note: Vercel **Hobby is non-commercial**; selling ad space makes this a commercial deployment, so plan

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 
 export type Role = "superadmin" | "admin" | "business";
@@ -12,7 +13,8 @@ export type Profile = {
   businessRole: BusinessRole | null;
 };
 
-export async function getProfile(): Promise<Profile | null> {
+/** Cached per request: the header and the page share one lookup. */
+export const getProfile = cache(async (): Promise<Profile | null> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -44,7 +46,7 @@ export async function getProfile(): Promise<Profile | null> {
     businessId: (membership?.business_id as string | undefined) ?? legacyBusinessId,
     businessRole: membershipRole ?? (legacyBusinessId ? "owner" : null),
   };
-}
+});
 
 /** True when this person may change the listing, its media and its polls. */
 export function canWriteBusiness(profile: Profile | null): boolean {
