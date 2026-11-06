@@ -1,11 +1,14 @@
 import QRCode from "qrcode";
+import { getQrBaseUrl } from "@/lib/settings";
 
 /**
- * Generates a print-quality SVG QR code for a path on the current host.
+ * Generates a print-quality SVG QR code for a path.
  *
- * `path` must be site-relative (e.g. /businesses/acme) so the code always
- * points at whatever host is serving this request — no stale vercel.app URLs
- * baked into printed cards.
+ * The base URL comes from the admin "QR base URL" setting when set (so printed
+ * cards can point at the final subdomain before it is live), otherwise from the
+ * host serving this request.
+ *
+ * `path` must be site-relative, e.g. /businesses/acme.
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -18,11 +21,13 @@ export async function GET(request: Request) {
     return new Response("Invalid path", { status: 400 });
   }
 
+  const override = await getQrBaseUrl();
   const host =
     request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "localhost:3000";
   const proto =
     request.headers.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const target = `${proto}://${host}${path}`;
+  const base = override || `${proto}://${host}`;
+  const target = `${base}${path}`;
 
   const svg = await QRCode.toString(target, {
     type: "svg",
@@ -37,10 +42,8 @@ export async function GET(request: Request) {
   return new Response(svg, {
     headers: {
       "content-type": "image/svg+xml; charset=utf-8",
-      "cache-control": "public, max-age=3600",
-      ...(download
-        ? { "content-disposition": `attachment; filename="qr-${slug}.svg"` }
-        : {}),
+      "cache-control": "public, max-age=300",
+      ...(download ? { "content-disposition": `attachment; filename="qr-${slug}.svg"` } : {}),
     },
   });
 }
