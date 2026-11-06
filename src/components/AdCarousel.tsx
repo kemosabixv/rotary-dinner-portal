@@ -75,7 +75,10 @@ export function AdCarousel({
 
   useEffect(() => {
     if (!activeId || !trackImpressions) return;
-    trackEvent({ businessId: activeId, kind: "impression", source: "carousel" });
+    trackEvent(
+      { businessId: activeId, kind: "impression", source: "carousel" },
+      `impression:carousel:${activeId}`,
+    );
   }, [activeId, trackImpressions]);
 
   if (items.length === 0) {
@@ -308,6 +311,9 @@ export function AdCarousel({
         {!overlay && (
           <Link
             href={`/businesses/${item.slug}`}
+            onClick={() =>
+              trackEvent({ businessId: item.id, kind: "click", source: "carousel" })
+            }
             className="text-xs font-medium uppercase tracking-wider text-brand hover:text-brand-ink"
           >
             View listing →

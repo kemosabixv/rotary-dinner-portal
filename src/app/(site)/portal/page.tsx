@@ -110,7 +110,12 @@ export default async function PortalPage() {
 
   const unread = notifications.filter((notification) => !notification.readAt).length;
 
-  const maxDaily = Math.max(1, ...daily.map((entry) => entry.impressions + entry.clicks));
+  const maxDaily = Math.max(
+    1,
+    ...daily.map((entry) =>
+      Math.max(entry.impressions, entry.adClicks, entry.contactClicks),
+    ),
+  );
   const responsesByPoll = await Promise.all(
     polls.map(async (poll) => ({ poll, responses: await listResponses(poll.id) })),
   );
@@ -213,16 +218,19 @@ export default async function PortalPage() {
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-display text-lg text-ink">Views &amp; clicks</h2>
           <p className="text-xs text-muted">
-            {totals.impressions} views · {totals.clicks} clicks all time
+            {totals.impressions} views · {totals.adClicks} ad clicks · {totals.contactClicks} contact
+            clicks all time
           </p>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {[
             { label: "Views (7d)", value: totals.impressions7d },
-            { label: "Clicks (7d)", value: totals.clicks7d },
+            { label: "Ad clicks (7d)", value: totals.adClicks7d },
+            { label: "Contact clicks (7d)", value: totals.contactClicks7d },
             { label: "Views (all time)", value: totals.impressions },
-            { label: "Clicks (all time)", value: totals.clicks },
+            { label: "Ad clicks (all time)", value: totals.adClicks },
+            { label: "Contact clicks (all time)", value: totals.contactClicks },
           ].map((stat) => (
             <div key={stat.label} className="rounded-xl border border-line bg-paper/60 px-4 py-3">
               <p className="text-[11px] uppercase tracking-[0.14em] text-muted">{stat.label}</p>
@@ -236,22 +244,30 @@ export default async function PortalPage() {
             {daily.map((entry) => (
               <div
                 key={entry.day}
-                className="flex h-full flex-1 flex-col justify-end gap-0.5"
-                title={`${entry.day}: ${entry.impressions} views, ${entry.clicks} clicks`}
+                className="flex h-full flex-1 items-end gap-[2px]"
+                title={`${entry.day}: ${entry.impressions} views, ${entry.adClicks} ad clicks, ${entry.contactClicks} contact clicks`}
               >
                 <div
-                  className="w-full rounded-t bg-brand/70"
+                  className="flex-1 rounded-t bg-brand/70"
                   style={{ height: `${Math.round((entry.impressions / maxDaily) * 100)}%` }}
                 />
                 <div
-                  className="w-full rounded-t bg-accent"
-                  style={{ height: `${Math.round((entry.clicks / maxDaily) * 100)}%` }}
+                  className="flex-1 rounded-t bg-accent"
+                  style={{ height: `${Math.round((entry.adClicks / maxDaily) * 100)}%` }}
+                />
+                <div
+                  className="flex-1 rounded-t bg-emerald-500/80"
+                  style={{ height: `${Math.round((entry.contactClicks / maxDaily) * 100)}%` }}
                 />
               </div>
             ))}
           </div>
           <p className="mt-2 text-[10px] text-muted">
-            Last 14 days · blue = views, gold = clicks
+            Last 14 days · blue = views, gold = ad clicks, green = contact clicks
+          </p>
+          <p className="mt-1 text-[10px] text-muted">
+            Views count once per visitor session. Ad clicks are carousel and directory cards; contact
+            clicks are call, email, website, WhatsApp and social links.
           </p>
         </div>
       </section>

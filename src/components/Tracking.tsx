@@ -2,7 +2,20 @@
 
 import { useEffect, useRef } from "react";
 
-export function trackEvent(payload: { businessId: string; kind: "impression" | "click"; source: string }) {
+export function trackEvent(
+  payload: { businessId: string; kind: "impression" | "click"; source: string },
+  dedupeKey?: string,
+) {
+  if (dedupeKey && typeof window !== "undefined") {
+    try {
+      const key = `trk:${dedupeKey}`;
+      if (window.sessionStorage.getItem(key)) return;
+      window.sessionStorage.setItem(key, "1");
+    } catch {
+      // Private mode / storage disabled: count it rather than lose it.
+    }
+  }
+
   const body = JSON.stringify(payload);
   if (typeof navigator !== "undefined" && navigator.sendBeacon) {
     navigator.sendBeacon("/api/track", new Blob([body], { type: "application/json" }));
@@ -16,7 +29,7 @@ export function trackEvent(payload: { businessId: string; kind: "impression" | "
   });
 }
 
-/** Fires one impression when the element mounts. */
+/** Fires one impression per business per browser session. */
 export function TrackEvent({
   businessId,
   kind = "impression",
@@ -31,7 +44,7 @@ export function TrackEvent({
   useEffect(() => {
     if (sent.current) return;
     sent.current = true;
-    trackEvent({ businessId, kind, source });
+    trackEvent({ businessId, kind, source }, `${kind}:${source}:${businessId}`);
   }, [businessId, kind, source]);
 
   return null;

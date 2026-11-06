@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { trackEvent } from "@/components/Tracking";
 import { mediaUrl } from "@/lib/media";
 import type { Business } from "@/lib/types";
 
@@ -10,12 +13,19 @@ const tierLabel: Record<Business["packageTier"], string> = {
   comp: "Community",
 };
 
-export function BusinessCard({ business }: { business: Business }) {
+export function BusinessCard({
+  business,
+  source = "directory",
+}: {
+  business: Business;
+  source?: string;
+}) {
   const logo = mediaUrl(business.logoPath);
 
   return (
     <Link
       href={`/businesses/${business.slug}`}
+      onClick={() => trackEvent({ businessId: business.id, kind: "click", source })}
       className="group flex h-full flex-col gap-4 rounded-2xl border border-line bg-surface p-5 transition-shadow hover:shadow-[0_18px_40px_-28px_rgba(0,0,0,0.45)]"
     >
       <div className="flex items-start justify-between gap-3">

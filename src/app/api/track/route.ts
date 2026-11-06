@@ -14,6 +14,29 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient();
+
+  // Don't count staff previews or a business viewing its own listing.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    const [{ data: profile }, { data: membership }] = await Promise.all([
+      supabase.from("profiles").select("role").eq("user_id", user.id).maybeSingle(),
+      supabase
+        .from("business_members")
+        .select("business_id")
+        .eq("user_id", user.id)
+        .eq("business_id", businessId)
+        .maybeSingle(),
+    ]);
+
+    const staff = profile?.role === "admin" || profile?.role === "superadmin";
+    if (staff || membership) {
+      return new Response(null, { status: 204 });
+    }
+  }
+
   await supabase.from("business_events").insert({ business_id: businessId, kind, source });
 
   return new Response(null, { status: 204 });

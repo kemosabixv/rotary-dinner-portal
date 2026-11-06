@@ -71,7 +71,7 @@ export default async function HomePage() {
           <AdCarousel items={carouselItems} />
           <div className="grid gap-4 sm:grid-cols-2">
             {businesses.slice(0, 2).map((business) => (
-              <BusinessCard key={business.id} business={business} />
+              <BusinessCard key={business.id} business={business} source="home" />
             ))}
           </div>
         </div>
@@ -90,7 +90,7 @@ export default async function HomePage() {
             },
             {
               title: "The proof",
-              body: "Every listing reports impressions and clicks, so you can see what the placement actually delivered.",
+              body: "Every listing reports views, ad clicks and contact clicks, so you can see what the placement actually delivered.",
             },
           ].map((item) => (
             <div key={item.title}>
